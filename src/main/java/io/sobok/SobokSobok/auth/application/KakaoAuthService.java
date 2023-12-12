@@ -11,9 +11,14 @@ import io.sobok.SobokSobok.auth.ui.dto.SocialSignupRequest;
 import io.sobok.SobokSobok.auth.ui.dto.SocialSignupResponse;
 import io.sobok.SobokSobok.external.kakao.KakaoService;
 import io.sobok.SobokSobok.external.kakao.dto.response.KakaoProfile;
+import io.sobok.SobokSobok.security.Jwt;
+import io.sobok.SobokSobok.security.JwtProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,10 +28,14 @@ public class KakaoAuthService extends AuthService {
 
     private final UserRepository userRepository;
 
+    private final JwtProvider jwtProvider;
+
     @Override
     @Transactional
     public SocialSignupResponse signup(SocialSignupRequest request) {
         KakaoProfile kakaoProfile = kakaoService.getProfileByCode(request.code());
+
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(kakaoProfile.id(), "");
 
         User signupUser = userRepository.save(User.builder()
                 .username(request.username())
@@ -36,7 +45,7 @@ public class KakaoAuthService extends AuthService {
                         .socialProfileImage(kakaoProfile.kakaoAccount().profile().profileImageUrl())
                         .build())
                 .deviceToken(request.deviceToken())
-                .role(Role.USER)
+                .roles(Role.USER.name())
                 .build());
 
         // JWT 발급
