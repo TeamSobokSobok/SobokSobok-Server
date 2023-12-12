@@ -9,6 +9,9 @@ import io.sobok.SobokSobok.auth.ui.dto.SocialLoginRequest;
 import io.sobok.SobokSobok.auth.ui.dto.SocialLoginResponse;
 import io.sobok.SobokSobok.auth.ui.dto.SocialSignupRequest;
 import io.sobok.SobokSobok.auth.ui.dto.SocialSignupResponse;
+import io.sobok.SobokSobok.exception.ErrorCode;
+import io.sobok.SobokSobok.exception.model.ConflictException;
+import io.sobok.SobokSobok.exception.model.NotFoundException;
 import io.sobok.SobokSobok.external.kakao.KakaoService;
 import io.sobok.SobokSobok.external.kakao.dto.response.KakaoProfile;
 import io.sobok.SobokSobok.security.Jwt;
@@ -65,7 +68,7 @@ public class KakaoAuthService extends AuthService {
         KakaoProfile kakaoProfile = kakaoService.getProfileByCode(request.code());
 
         User loginUser = userRepository.findBySocialInfoSocialId(kakaoProfile.id())
-                .orElseThrow(() -> new RuntimeException("Error"));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_USER));
 
         // deviceToken 업데이트
        if (!request.deviceToken().equals(loginUser.getDeviceToken())) {

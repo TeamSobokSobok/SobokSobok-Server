@@ -6,8 +6,12 @@ import io.sobok.SobokSobok.auth.ui.dto.SocialLoginRequest;
 import io.sobok.SobokSobok.auth.ui.dto.SocialLoginResponse;
 import io.sobok.SobokSobok.auth.ui.dto.SocialSignupRequest;
 import io.sobok.SobokSobok.auth.ui.dto.SocialSignupResponse;
+import io.sobok.SobokSobok.common.dto.ApiResponse;
+import io.sobok.SobokSobok.exception.SuccessCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,14 +22,24 @@ public class AuthController {
     private final AuthServiceProvider authServiceProvider;
 
     @PostMapping("/signup")
-    public SocialSignupResponse signup(@RequestBody @Valid final SocialSignupRequest request) {
+    public ResponseEntity<ApiResponse<SocialSignupResponse>> signup(@RequestBody @Valid final SocialSignupRequest request) {
         AuthService authService = authServiceProvider.getAuthService(request.socialType());
-        return authService.signup(request);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success(
+                        SuccessCode.SOCIAL_SIGNUP_SUCCESS,
+                        authService.signup(request)
+                ));
     }
 
     @GetMapping("/login")
-    public SocialLoginResponse login(@RequestBody @Valid final SocialLoginRequest request) {
+    public ResponseEntity<ApiResponse<SocialLoginResponse>> login(@RequestBody @Valid final SocialLoginRequest request) {
         AuthService authService = authServiceProvider.getAuthService(request.socialType());
-        return authService.login(request);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        SuccessCode.SOCIAL_LOGIN_SUCCESS,
+                        authService.login(request)
+                ));
     }
 }
