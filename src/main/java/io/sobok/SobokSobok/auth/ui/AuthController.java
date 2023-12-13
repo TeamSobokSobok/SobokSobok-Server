@@ -2,6 +2,7 @@ package io.sobok.SobokSobok.auth.ui;
 
 import io.sobok.SobokSobok.auth.application.AuthService;
 import io.sobok.SobokSobok.auth.application.AuthServiceProvider;
+import io.sobok.SobokSobok.auth.domain.SocialType;
 import io.sobok.SobokSobok.auth.ui.dto.SocialLoginRequest;
 import io.sobok.SobokSobok.auth.ui.dto.SocialLoginResponse;
 import io.sobok.SobokSobok.auth.ui.dto.SocialSignupRequest;
@@ -23,6 +24,7 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<SocialSignupResponse>> signup(@RequestBody @Valid final SocialSignupRequest request) {
+
         AuthService authService = authServiceProvider.getAuthService(request.socialType());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -33,13 +35,22 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public ResponseEntity<ApiResponse<SocialLoginResponse>> login(@RequestBody @Valid final SocialLoginRequest request) {
-        AuthService authService = authServiceProvider.getAuthService(request.socialType());
+    public ResponseEntity<ApiResponse<SocialLoginResponse>> login(
+            @RequestParam final String code,
+            @RequestParam final SocialType socialType,
+            @RequestParam final String deviceToken
+    ) {
+
+        AuthService authService = authServiceProvider.getAuthService(socialType);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(
                         SuccessCode.SOCIAL_LOGIN_SUCCESS,
-                        authService.login(request)
+                        authService.login(SocialLoginRequest.builder()
+                                .code(code)
+                                .socialType(socialType)
+                                .deviceToken(deviceToken)
+                                .build())
                 ));
     }
 }

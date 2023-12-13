@@ -14,10 +14,12 @@ import io.sobok.SobokSobok.exception.model.ConflictException;
 import io.sobok.SobokSobok.exception.model.NotFoundException;
 import io.sobok.SobokSobok.external.kakao.KakaoService;
 import io.sobok.SobokSobok.external.kakao.dto.response.KakaoProfile;
-import io.sobok.SobokSobok.security.Jwt;
-import io.sobok.SobokSobok.security.JwtProvider;
+import io.sobok.SobokSobok.security.jwt.Jwt;
+import io.sobok.SobokSobok.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,13 +34,20 @@ public class KakaoAuthService extends AuthService {
     private final UserRepository userRepository;
 
     private final JwtProvider jwtProvider;
+    private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
     @Override
     @Transactional
     public SocialSignupResponse signup(SocialSignupRequest request) {
         KakaoProfile kakaoProfile = kakaoService.getProfileByCode(request.code());
 
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(kakaoProfile.id(), "");
+        if (userRepository.existsBySocialInfoSocialId(kakaoProfile.id())) {
+            throw new ConflictException(ErrorCode.ALREADY_EXISTS_USER);
+        }
+
+        if (userRepository.existsByUsername(request.username())) {
+            throw new ConflictException(ErrorCode.ALREADY_USING_USERNAME);
+        }
 
         User signupUser = userRepository.save(User.builder()
                 .username(request.username())
@@ -51,14 +60,14 @@ public class KakaoAuthService extends AuthService {
                 .roles(Role.USER.name())
                 .build());
 
-        // JWT 발급
+        Jwt jwt = getUserJwt(signupUser.getUsername());
 
         return SocialSignupResponse.builder()
                 .id(signupUser.getId())
                 .username(signupUser.getUsername())
                 .socialId(signupUser.getSocialInfo().getSocialId())
-                .accessToken("accessToken")
-                .refreshToken("refreshToken")
+                .accessToken(jwt.accessToken())
+                .refreshToken(jwt.refreshToken())
                 .build();
     }
 
@@ -70,16 +79,20 @@ public class KakaoAuthService extends AuthService {
         User loginUser = userRepository.findBySocialInfoSocialId(kakaoProfile.id())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_USER));
 
-        // deviceToken 업데이트
        if (!request.deviceToken().equals(loginUser.getDeviceToken())) {
            loginUser.updateDeviceToken(request.deviceToken());
        }
 
-        // JWT 발급
+       Jwt jwt = getUserJwt(loginUser.getUsername());
 
         return SocialLoginResponse.builder()
-                .accessToken("accessToken")
-                .refreshToken("refreshToken")
+                .accessToken(jwt.accessToken())
+                .refreshToken(jwt.refreshToken())
                 .build();
+    }
+
+    private Jwt getUserJwt(String principle) {
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(principle, null, List.of(new SimpleGrantedAuthority(Role.USER.name())));
+        return jwtProvider.createToken(authenticationToken);
     }
 }

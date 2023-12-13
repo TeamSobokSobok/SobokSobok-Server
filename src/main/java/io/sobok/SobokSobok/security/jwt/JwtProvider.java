@@ -1,4 +1,4 @@
-package io.sobok.SobokSobok.security;
+package io.sobok.SobokSobok.security.jwt;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -90,7 +90,7 @@ public class JwtProvider implements InitializingBean {
                 .setSubject(subject)
                 .claim(AUTHORITIES_KEY, authorities)
                 .claim(TOKEN_TYPE_KEY, tokenType)
-                .signWith(key, SignatureAlgorithm.HS512)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .setExpiration(expirationDate)
                 .compact();
     }

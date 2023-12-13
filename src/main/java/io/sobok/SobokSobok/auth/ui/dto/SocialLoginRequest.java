@@ -3,7 +3,9 @@ package io.sobok.SobokSobok.auth.ui.dto;
 import io.sobok.SobokSobok.auth.domain.SocialType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import lombok.Builder;
 
+@Builder
 public record SocialLoginRequest(
 
         @Schema(required = true)

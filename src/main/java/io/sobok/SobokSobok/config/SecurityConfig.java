@@ -1,7 +1,7 @@
 package io.sobok.SobokSobok.config;
 
-import io.sobok.SobokSobok.security.JwtCustomFilter;
-import io.sobok.SobokSobok.security.JwtProvider;
+import io.sobok.SobokSobok.security.jwt.JwtCustomFilter;
+import io.sobok.SobokSobok.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;

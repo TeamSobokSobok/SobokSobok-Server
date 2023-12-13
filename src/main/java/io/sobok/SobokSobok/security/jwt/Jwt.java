@@ -1,4 +1,4 @@
-package io.sobok.SobokSobok.security;
+package io.sobok.SobokSobok.security.jwt;
 
 import lombok.Builder;
 
