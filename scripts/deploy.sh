@@ -66,6 +66,8 @@ do
   sleep 10
 done
 
+ls -al
+pwd
 chmod +x ./switch.sh
 
 echo "> 스위칭"
