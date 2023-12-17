@@ -1,7 +1,5 @@
 #!/bin/bash
 BUILD_PATH=$(ls /home/ubuntu/app/SobokSobok-0.0.1-SNAPSHOT.jar)
-JAR_NAME=$(basename $BUILD_PATH)
-echo "> build 파일명: $JAR_NAME"
 
 echo "> 현재 구동중인 Set 확인"
 CURRENT_PROFILE=$(curl -s http://localhost/profile)
@@ -23,7 +21,6 @@ else
 fi
 
 IDLE_APPLICATION=$IDLE_PROFILE-soboksobok.jar
-IDLE_APPLICATION_PATH=$BUILD_PATH$IDLE_APPLICATION
 
 echo "> $IDLE_PROFILE 에서 구동중인 애플리케이션 pid 확인"
 IDLE_PID=$(pgrep -f $IDLE_APPLICATION)
@@ -38,7 +35,7 @@ else
 fi
 
 echo "> $IDLE_PROFILE 배포"
-nohup java -jar -Duser.timezone=Asia/Seoul -Dspring.profiles.active=$IDLE_PROFILE $IDLE_APPLICATION_PATH >> /home/ubuntu/app/nohup.out 2>&1 &
+nohup java -jar -Duser.timezone=Asia/Seoul -Dspring.profiles.active=$IDLE_PROFILE $BUILD_PATH >> /home/ubuntu/app/nohup.out 2>&1 &
 
 echo "> $IDLE_PROFILE 10초 후 Health check 시작"
 echo "> curl -s http://localhost:$IDLE_PORT/actuator/health "
