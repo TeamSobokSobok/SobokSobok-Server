@@ -17,7 +17,7 @@ then
   IDLE_PORT=8081
 else
   echo "> 일치하는 Profile이 없습니다. Profile: $CURRENT_PROFILE"
-  echo "> set1을 할당합니다. IDLE_PROFILE: set1"
+  echo "> deplony-one을 할당합니다. IDLE_PROFILE: deploy-one"
   IDLE_PROFILE=deploy-one
   IDLE_PORT=8081
 fi
