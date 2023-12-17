@@ -20,10 +20,10 @@ else
   IDLE_PORT=8081
 fi
 
-IDLE_APPLICATION=$IDLE_PROFILE-soboksobok.jar
+IDLE_APPLICATION=SobokSobok-0.0.1-SNAPSHOT.jar
 
 echo "> $IDLE_PROFILE 에서 구동중인 애플리케이션 pid 확인"
-IDLE_PID=$(pgrep -f $IDLE_APPLICATION)
+IDLE_PID=$(pgrep -f $IDLE_PROFILE)
 
 if [ -z $IDLE_PID ]
 then
