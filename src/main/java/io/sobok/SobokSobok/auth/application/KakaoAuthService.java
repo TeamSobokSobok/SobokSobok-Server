@@ -60,7 +60,7 @@ public class KakaoAuthService extends AuthService {
                 .roles(Role.USER.name())
                 .build());
 
-        Jwt jwt = getUserJwt(signupUser.getUsername());
+        Jwt jwt = getUserJwt(signupUser.getSocialInfo().getSocialId());
 
         return SocialSignupResponse.builder()
                 .id(signupUser.getId())
@@ -83,7 +83,7 @@ public class KakaoAuthService extends AuthService {
            loginUser.updateDeviceToken(request.deviceToken());
        }
 
-       Jwt jwt = getUserJwt(loginUser.getUsername());
+       Jwt jwt = getUserJwt(loginUser.getSocialInfo().getSocialId());
 
         return SocialLoginResponse.builder()
                 .accessToken(jwt.accessToken())
