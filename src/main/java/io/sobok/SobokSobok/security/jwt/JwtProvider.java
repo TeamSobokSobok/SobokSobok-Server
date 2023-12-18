@@ -5,6 +5,8 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,6 +19,7 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Component
@@ -31,16 +34,20 @@ public class JwtProvider implements InitializingBean {
     private final Long accessTokenExpiration;
     private final Long refreshTokenExpiration;
 
+    private final RedisTemplate<String, String> redisTemplate;
+
     private Key key;
 
     public JwtProvider(
             @Value("${jwt.secret}") String secretCode,
             @Value("${jwt.access-expiration}") Long accessTokenExpiration,
-            @Value("${jwt.refresh-expiration}") Long refreshTokenExpiration
+            @Value("${jwt.refresh-expiration}") Long refreshTokenExpiration,
+            RedisTemplate<String, String> redisTemplate
     ) {
         this.secretCode = secretCode;
         this.accessTokenExpiration = accessTokenExpiration;
         this.refreshTokenExpiration = refreshTokenExpiration;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
@@ -58,6 +65,9 @@ public class JwtProvider implements InitializingBean {
 
         String accessToken = generateToken(authentication.getName(), authorities, ACCESS_TOKEN_TYPE, accessTokenExpiration);
         String refreshToken = generateToken(authentication.getName(), "", REFRESH_TOKEN_TYPE, refreshTokenExpiration);
+
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        valueOperations.set(authentication.getName(), refreshToken, refreshTokenExpiration, TimeUnit.SECONDS);
 
         return Jwt.builder()
                 .accessToken(accessToken)
@@ -104,9 +114,9 @@ public class JwtProvider implements InitializingBean {
             return true;
         } catch (SecurityException |
                  MalformedJwtException |
-                ExpiredJwtException |
-                UnsupportedJwtException |
-                IllegalArgumentException e
+                 ExpiredJwtException |
+                 UnsupportedJwtException |
+                 IllegalArgumentException e
         ) {
             return false;
         }
