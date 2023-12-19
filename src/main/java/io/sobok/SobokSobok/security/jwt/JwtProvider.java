@@ -3,6 +3,7 @@ package io.sobok.SobokSobok.security.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.sobok.SobokSobok.auth.domain.Role;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -19,6 +20,7 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -57,6 +59,11 @@ public class JwtProvider implements InitializingBean {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
+    public Jwt getUserJwt(String principle) {
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(principle, null, List.of(new SimpleGrantedAuthority(Role.USER.name())));
+        return createToken(authenticationToken);
+    }
+
     public Jwt createToken(Authentication authentication) {
 
         String authorities = authentication.getAuthorities().stream()
@@ -67,7 +74,7 @@ public class JwtProvider implements InitializingBean {
         String refreshToken = generateToken(authentication.getName(), "", REFRESH_TOKEN_TYPE, refreshTokenExpiration);
 
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-        valueOperations.set(authentication.getName(), refreshToken, refreshTokenExpiration, TimeUnit.SECONDS);
+        valueOperations.set(refreshToken, authentication.getName(), refreshTokenExpiration, TimeUnit.SECONDS);
 
         return Jwt.builder()
                 .accessToken(accessToken)
