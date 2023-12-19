@@ -17,24 +17,19 @@ import io.sobok.SobokSobok.external.kakao.dto.response.KakaoProfile;
 import io.sobok.SobokSobok.security.jwt.Jwt;
 import io.sobok.SobokSobok.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
-public class KakaoAuthService extends AuthService {
+public class KakaoSocialService extends SocialService {
 
     private final KakaoService kakaoService;
 
     private final UserRepository userRepository;
 
     private final JwtProvider jwtProvider;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
     @Override
     @Transactional
@@ -60,7 +55,7 @@ public class KakaoAuthService extends AuthService {
                 .roles(Role.USER.name())
                 .build());
 
-        Jwt jwt = getUserJwt(signupUser.getSocialInfo().getSocialId());
+        Jwt jwt = jwtProvider.getUserJwt(signupUser.getSocialInfo().getSocialId());
 
         return SocialSignupResponse.builder()
                 .id(signupUser.getId())
@@ -83,16 +78,11 @@ public class KakaoAuthService extends AuthService {
            loginUser.updateDeviceToken(request.deviceToken());
        }
 
-       Jwt jwt = getUserJwt(loginUser.getSocialInfo().getSocialId());
+       Jwt jwt = jwtProvider.getUserJwt(loginUser.getSocialInfo().getSocialId());
 
         return SocialLoginResponse.builder()
                 .accessToken(jwt.accessToken())
                 .refreshToken(jwt.refreshToken())
                 .build();
-    }
-
-    private Jwt getUserJwt(String principle) {
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(principle, null, List.of(new SimpleGrantedAuthority(Role.USER.name())));
-        return jwtProvider.createToken(authenticationToken);
     }
 }

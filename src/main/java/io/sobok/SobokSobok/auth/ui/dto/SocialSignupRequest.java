@@ -7,19 +7,19 @@ import jakarta.validation.constraints.NotNull;
 
 public record SocialSignupRequest(
 
-        @Schema(required = true)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank
         String code,
 
-        @Schema(required = true)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull
         SocialType socialType,
 
-        @Schema(required = true)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank
         String username,
 
-        @Schema(required = true)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         @NotBlank
         String deviceToken
 ) {
