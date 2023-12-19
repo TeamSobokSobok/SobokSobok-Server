@@ -1,12 +1,10 @@
 package io.sobok.SobokSobok.auth.ui;
 
 import io.sobok.SobokSobok.auth.application.AuthService;
-import io.sobok.SobokSobok.auth.application.AuthServiceProvider;
+import io.sobok.SobokSobok.auth.application.SocialService;
+import io.sobok.SobokSobok.auth.application.SocialServiceProvider;
 import io.sobok.SobokSobok.auth.domain.SocialType;
-import io.sobok.SobokSobok.auth.ui.dto.SocialLoginRequest;
-import io.sobok.SobokSobok.auth.ui.dto.SocialLoginResponse;
-import io.sobok.SobokSobok.auth.ui.dto.SocialSignupRequest;
-import io.sobok.SobokSobok.auth.ui.dto.SocialSignupResponse;
+import io.sobok.SobokSobok.auth.ui.dto.*;
 import io.sobok.SobokSobok.common.dto.ApiResponse;
 import io.sobok.SobokSobok.exception.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,7 +21,8 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Auth", description = "인증 관련 컨트롤러")
 public class AuthController {
 
-    private final AuthServiceProvider authServiceProvider;
+    private final AuthService authService;
+    private final SocialServiceProvider socialServiceProvider;
 
     @PostMapping("/signup")
     @Operation(
@@ -32,12 +31,12 @@ public class AuthController {
     )
     public ResponseEntity<ApiResponse<SocialSignupResponse>> signup(@RequestBody @Valid final SocialSignupRequest request) {
 
-        AuthService authService = authServiceProvider.getAuthService(request.socialType());
+        SocialService socialService = socialServiceProvider.getSocialService(request.socialType());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(
                         SuccessCode.SOCIAL_SIGNUP_SUCCESS,
-                        authService.signup(request)
+                        socialService.signup(request)
                 ));
     }
 
@@ -52,16 +51,33 @@ public class AuthController {
             @RequestParam final String deviceToken
     ) {
 
-        AuthService authService = authServiceProvider.getAuthService(socialType);
+        SocialService socialService = socialServiceProvider.getSocialService(socialType);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(
                         SuccessCode.SOCIAL_LOGIN_SUCCESS,
-                        authService.login(SocialLoginRequest.builder()
+                        socialService.login(SocialLoginRequest.builder()
                                 .code(code)
                                 .socialType(socialType)
                                 .deviceToken(deviceToken)
                                 .build())
+                ));
+    }
+
+    @GetMapping("/refresh")
+    @Operation(
+            summary = "JWT 토큰 재발급",
+            description = "Refresh token을 통해 JWT 토큰을 재발급받는 API 입니다."
+    )
+    public ResponseEntity<ApiResponse<JwtTokenResponse>> refresh(
+            @RequestHeader("Refresh-Token") final String refreshToken
+    ) {
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        SuccessCode.TOKEN_REFRESH_SUCCESS,
+                        authService.refresh(refreshToken)
                 ));
     }
 }

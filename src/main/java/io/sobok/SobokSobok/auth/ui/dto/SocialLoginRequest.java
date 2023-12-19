@@ -8,14 +8,14 @@ import lombok.Builder;
 @Builder
 public record SocialLoginRequest(
 
-        @Schema(required = true)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         String code,
 
-        @Schema(required = true)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull
         SocialType socialType,
 
-        @Schema(required = true)
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         String deviceToken
 ) {
 }
