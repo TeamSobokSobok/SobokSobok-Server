@@ -4,6 +4,7 @@ import io.sobok.SobokSobok.auth.application.AuthService;
 import io.sobok.SobokSobok.auth.application.SocialService;
 import io.sobok.SobokSobok.auth.application.SocialServiceProvider;
 import io.sobok.SobokSobok.auth.domain.SocialType;
+import io.sobok.SobokSobok.auth.domain.User;
 import io.sobok.SobokSobok.auth.ui.dto.*;
 import io.sobok.SobokSobok.common.dto.ApiResponse;
 import io.sobok.SobokSobok.exception.SuccessCode;
@@ -13,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -61,6 +63,21 @@ public class AuthController {
                                 .socialType(socialType)
                                 .deviceToken(deviceToken)
                                 .build())
+                ));
+    }
+
+    @GetMapping("/logout")
+    @Operation(
+            summary = "로그아웃 API 메서드",
+            description = "사용자의 로그아웃 기능을 하는 API 입니다."
+    )
+    public ResponseEntity<ApiResponse<Void>> logout(@AuthenticationPrincipal User user) {
+
+        authService.logout(user.getId());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        SuccessCode.LOGOUT_SUCCESS
                 ));
     }
 

@@ -4,6 +4,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import io.sobok.SobokSobok.auth.domain.Role;
+import io.sobok.SobokSobok.security.service.CustomUserDetailsService;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -27,6 +28,8 @@ import java.util.stream.Collectors;
 @Component
 public class JwtProvider implements InitializingBean {
 
+    private final CustomUserDetailsService userDetailsService;
+
     private static final String AUTHORITIES_KEY = "auth";
     private static final String TOKEN_TYPE_KEY = "type";
     private static final String ACCESS_TOKEN_TYPE = "access";
@@ -41,11 +44,13 @@ public class JwtProvider implements InitializingBean {
     private Key key;
 
     public JwtProvider(
+            CustomUserDetailsService userDetailsService,
             @Value("${jwt.secret}") String secretCode,
             @Value("${jwt.access-expiration}") Long accessTokenExpiration,
             @Value("${jwt.refresh-expiration}") Long refreshTokenExpiration,
             RedisTemplate<String, String> redisTemplate
     ) {
+        this.userDetailsService = userDetailsService;
         this.secretCode = secretCode;
         this.accessTokenExpiration = accessTokenExpiration;
         this.refreshTokenExpiration = refreshTokenExpiration;
@@ -71,10 +76,10 @@ public class JwtProvider implements InitializingBean {
                 .collect(Collectors.joining(","));
 
         String accessToken = generateToken(authentication.getName(), authorities, ACCESS_TOKEN_TYPE, accessTokenExpiration);
-        String refreshToken = generateToken(authentication.getName(), "", REFRESH_TOKEN_TYPE, refreshTokenExpiration);
+        String refreshToken = generateToken(authentication.getName(), authorities, REFRESH_TOKEN_TYPE, refreshTokenExpiration);
 
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-        valueOperations.set(refreshToken, authentication.getName(), refreshTokenExpiration, TimeUnit.SECONDS);
+        valueOperations.set(authentication.getName(), refreshToken, refreshTokenExpiration, TimeUnit.SECONDS);
 
         return Jwt.builder()
                 .accessToken(accessToken)
@@ -82,9 +87,9 @@ public class JwtProvider implements InitializingBean {
                 .build();
     }
 
-    public Authentication getAuthentication(String accessToken) {
+    public Authentication getAuthentication(String token) {
 
-        Claims claims = parseClaims(accessToken);
+        Claims claims = parseClaims(token);
 
         if (claims.get("auth") == null || claims.get("type") == null) {
             throw new RuntimeException("정보가 누락된 토큰입니다.");
@@ -94,14 +99,14 @@ public class JwtProvider implements InitializingBean {
                 .map(SimpleGrantedAuthority::new)
                 .toList();
 
-        UserDetails principal = new User(claims.getSubject(), "", authorities);
+        UserDetails principal = userDetailsService.loadUserByUsername(claims.getSubject());
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
     private String generateToken(String subject, String authorities, String tokenType, Long expiration) {
 
-        Long now = (new Date()).getTime();
-        Date expirationDate = new Date(now + expiration);
+        long now = (new Date()).getTime();
+        Date expirationDate = new Date(now + expiration * 1000);
 
         return Jwts.builder()
                 .setSubject(subject)
@@ -125,6 +130,7 @@ public class JwtProvider implements InitializingBean {
                  UnsupportedJwtException |
                  IllegalArgumentException e
         ) {
+            System.out.println(e.getMessage());
             return false;
         }
     }
