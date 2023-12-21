@@ -58,4 +58,19 @@ public class AuthService {
                 .refreshToken(jwt.refreshToken())
                 .build();
     }
+
+    @Transactional
+    public void leave(Long userId) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_USER));
+
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        if (valueOperations.get(user.getSocialInfo().getSocialId()) == null) {
+            throw new NotFoundException(ErrorCode.NOT_LOGGED_IN_USER);
+        }
+
+        redisTemplate.delete(user.getSocialInfo().getSocialId());
+        user.deleteUser();
+    }
 }
