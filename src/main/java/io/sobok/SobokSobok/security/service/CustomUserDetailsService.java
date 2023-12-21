@@ -16,8 +16,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     @Transactional
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 username입니다.: " + username));
+    public UserDetails loadUserByUsername(String socialId) throws UsernameNotFoundException {
+        return userRepository.findBySocialInfoSocialId(socialId)
+                .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 socialId 입니다.: " + socialId));
     }
 }
