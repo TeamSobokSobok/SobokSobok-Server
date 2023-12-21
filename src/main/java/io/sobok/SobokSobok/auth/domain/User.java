@@ -15,6 +15,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,6 +58,14 @@ public class User extends BaseEntity implements UserDetails {
 
     public void updateDeviceToken(String newDeviceToken) {
         this.deviceToken = newDeviceToken;
+    }
+
+    public void deleteUser() {
+        this.deviceToken = "";
+        this.username = "";
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+        this.socialInfo.removeSocialInfo();
     }
 
     @Override

@@ -97,4 +97,21 @@ public class AuthController {
                         authService.refresh(refreshToken)
                 ));
     }
+
+    @DeleteMapping("/user/leave")
+    @Operation(
+            summary = "소복소복 회원 탈퇴",
+            description = "소복소복 서비스를 탈퇴하는 API 입니다."
+    )
+    public ResponseEntity<ApiResponse<Void>> refresh(
+            @AuthenticationPrincipal User user
+    ) {
+
+        authService.leave(user.getId());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        SuccessCode.USER_LEAVE_SUCCESS
+                ));
+    }
 }
