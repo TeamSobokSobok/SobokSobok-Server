@@ -24,6 +24,11 @@ public class SocialInfo {
     @Column
     private String socialProfileImage;
 
+    public void removeSocialInfo() {
+        this.socialId = "";
+        this.socialProfileImage = "";
+    }
+
     @Builder
     public SocialInfo(SocialType socialType, String socialId, String socialProfileImage) {
         this.socialType = socialType;
