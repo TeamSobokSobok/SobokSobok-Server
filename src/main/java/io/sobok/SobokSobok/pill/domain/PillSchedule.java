@@ -31,9 +31,13 @@ public class PillSchedule extends BaseEntity {
     @ColumnDefault("false")
     private Boolean isCheck;
 
+    @Column(nullable = false)
+    private Long pillId;
+
     @Builder
-    public PillSchedule(LocalDate scheduleDate, String scheduleTime) {
+    public PillSchedule(LocalDate scheduleDate, String scheduleTime, Long pillId) {
         this.scheduleDate = scheduleDate;
         this.scheduleTime = scheduleTime;
+        this.pillId = pillId;
     }
 }
