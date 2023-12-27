@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers(new AntPathRequestMatcher("/auth/signup")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/auth/login")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/auth/refresh")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/user/**")).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
