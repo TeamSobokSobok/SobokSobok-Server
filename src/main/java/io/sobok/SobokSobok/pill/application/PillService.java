@@ -33,7 +33,8 @@ public class PillService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_USER));
 
-        validatePillCount(user.getId());
+        validatePillCount(user.getId(), request.pillName().length);
+        validatePillRequest(request.startDate(), request.endDate(), request.day(), request.timeList());
 
         for (String pill : request.pillName()) {
             Pill newPill = pillRepository.save(Pill.builder()
@@ -60,9 +61,15 @@ public class PillService {
         }
     }
 
-    private void validatePillCount(Long userId) {
-        if (pillQueryRepository.getPillCount(userId) >= 5) {
+    private void validatePillCount(Long userId, int requestPillCount) {
+        if (pillQueryRepository.getPillCount(userId) + requestPillCount > 5) {
             throw new BadRequestException(ErrorCode.EXCEEDED_PILL_COUNT);
+        }
+    }
+
+    private void validatePillRequest(LocalDate startDate, LocalDate endDate, String day, String[] timeList) {
+        if (startDate.isAfter(endDate) || day.isEmpty() || timeList.length == 0) {
+            throw new BadRequestException(ErrorCode.INVALID_PILL_REQUEST_DATA);
         }
     }
 }
