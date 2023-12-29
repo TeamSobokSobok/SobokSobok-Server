@@ -15,10 +15,29 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import java.util.stream.Stream;
+
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+
+    private static final String[] WHITE_LIST = {
+            // swagger
+            "/v3/**",
+            "/swagger-ui/**",
+
+            // health check
+            "/actuator/health",
+
+            // api
+            "/profile",
+            "/auth/signup",
+            "/auth/login",
+            "/auth/refresh",
+            "/user",
+            "/pill/count/**"
+    };
 
     private final JwtProvider jwtProvider;
 
@@ -31,14 +50,12 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
 //                        .requestMatchers(PathRequest.toH2Console()).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/v3/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/swagger-ui/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/actuator/health")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/profile")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/auth/signup")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/auth/login")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/auth/refresh")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/user/**")).permitAll()
+                        .requestMatchers(
+                                Stream
+                                        .of(WHITE_LIST)
+                                        .map(AntPathRequestMatcher::antMatcher)
+                                        .toArray(AntPathRequestMatcher[]::new)
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(

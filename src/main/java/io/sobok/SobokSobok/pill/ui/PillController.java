@@ -12,10 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -39,5 +36,35 @@ public class PillController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(SuccessCode.ADD_PILL_SUCCESS));
+    }
+
+    @GetMapping("/count")
+    @Operation(
+            summary = "내 약 개수 조회 API 메서드",
+            description = "내 약의 개수가 몇 개인지 확인하는 메서드입니다."
+    )
+    public ResponseEntity<ApiResponse<Integer>> getPillCount(@AuthenticationPrincipal User user) {
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        SuccessCode.GET_PILL_COUNT_SUCCESS,
+                        pillService.getPillCount(user.getId())
+                ));
+    }
+
+    @GetMapping("/count/{userId}")
+    @Operation(
+            summary = "타인 약 개수 조회 API 메서드",
+            description = "타인 약의 개수가 몇 개인지 확인하는 메서드입니다."
+    )
+    public ResponseEntity<ApiResponse<Integer>> getUserPillCount(@PathVariable Long userId) {
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        SuccessCode.GET_PILL_COUNT_SUCCESS,
+                        pillService.getPillCount(userId)
+                ));
     }
 }
