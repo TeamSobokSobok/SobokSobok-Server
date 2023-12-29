@@ -61,6 +61,16 @@ public class PillService {
         }
     }
 
+    @Transactional
+    public Integer getPillCount(Long userId) {
+
+        if (!userRepository.existsById(userId)) {
+            throw new NotFoundException(ErrorCode.UNREGISTERED_USER);
+        }
+
+        return pillQueryRepository.getPillCount(userId);
+    }
+
     private void validatePillCount(Long userId, int requestPillCount) {
         if (pillQueryRepository.getPillCount(userId) + requestPillCount > 5) {
             throw new BadRequestException(ErrorCode.EXCEEDED_PILL_COUNT);

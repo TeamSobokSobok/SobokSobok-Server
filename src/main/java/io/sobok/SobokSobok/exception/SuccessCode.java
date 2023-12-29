@@ -20,6 +20,7 @@ public enum SuccessCode {
 
     // pill
     ADD_PILL_SUCCESS(HttpStatus.CREATED, "약 추가에 성공했습니다."),
+    GET_PILL_COUNT_SUCCESS(HttpStatus.OK, "약 개수 조회에 성공했습니다."),
     ;
 
     private final HttpStatus code;
