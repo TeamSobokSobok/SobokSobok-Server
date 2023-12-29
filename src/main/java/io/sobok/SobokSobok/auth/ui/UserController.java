@@ -18,7 +18,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/")
+    @GetMapping("")
     @Operation(
             summary = "닉네임 중복 확인 API 메서드",
             description = "사용자 닉네임의 사용여부를 반환해주는 메서드입니다. true -> 사용중, false -> 사용 가능"
