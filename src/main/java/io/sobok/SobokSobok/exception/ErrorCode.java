@@ -22,6 +22,7 @@ public enum ErrorCode {
 
     // pill
     EXCEEDED_PILL_COUNT(HttpStatus.BAD_REQUEST, "약 개수가 초과됐습니다."),
+    INVALID_PILL_REQUEST_DATA(HttpStatus.BAD_REQUEST, "허용되지 않은 약 추가 요청 데이터입니다."),
 
     // external
     INVALID_EXTERNAL_REQUEST_DATA(HttpStatus.BAD_REQUEST, "외부 API 요청에 잘못된 데이터가 전달됐습니다."),
