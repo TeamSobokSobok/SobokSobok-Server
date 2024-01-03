@@ -1,6 +1,7 @@
 package io.sobok.SobokSobok.config;
 
-import io.sobok.SobokSobok.security.jwt.JwtCustomFilter;
+import io.sobok.SobokSobok.security.filter.ExceptionHandlerFilter;
+import io.sobok.SobokSobok.security.filter.JwtCustomFilter;
 import io.sobok.SobokSobok.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
 //import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
@@ -61,6 +62,10 @@ public class SecurityConfig {
                 .addFilterBefore(
                         new JwtCustomFilter(jwtProvider),
                         UsernamePasswordAuthenticationFilter.class
+                )
+                .addFilterBefore(
+                        new ExceptionHandlerFilter(),
+                        JwtCustomFilter.class
                 )
         ;
 
