@@ -1,5 +1,6 @@
-package io.sobok.SobokSobok.security.jwt;
+package io.sobok.SobokSobok.security.filter;
 
+import io.sobok.SobokSobok.security.jwt.JwtProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,7 +29,11 @@ public class JwtCustomFilter extends OncePerRequestFilter {
 
         String accessToken = resolveAccessToken(request);
 
-        if (accessToken != null && jwtProvider.validateToken(accessToken)) {
+        if (accessToken == null) {
+            throw new IllegalArgumentException();
+        }
+
+        if (jwtProvider.validateToken(accessToken)) {
             Authentication authentication = jwtProvider.getAuthentication(accessToken);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }

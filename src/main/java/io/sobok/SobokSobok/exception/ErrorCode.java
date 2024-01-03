@@ -20,6 +20,11 @@ public enum ErrorCode {
     ALREADY_EXISTS_USER(HttpStatus.CONFLICT, "이미 회원가입이 완료된 사용자입니다."),
     ALREADY_USING_USERNAME(HttpStatus.CONFLICT, "이미 사용중인 username입니다."),
 
+    // jwt
+    EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
+    MALFORMED_TOKEN(HttpStatus.UNAUTHORIZED, "잘못된 형식의 토큰입니다"),
+    NULL_TOKEN(HttpStatus.UNAUTHORIZED, "토큰이 존재하지 않습니다."),
+
     // pill
     EXCEEDED_PILL_COUNT(HttpStatus.BAD_REQUEST, "약 개수가 초과됐습니다."),
     INVALID_PILL_REQUEST_DATA(HttpStatus.BAD_REQUEST, "허용되지 않은 약 추가 요청 데이터입니다."),
