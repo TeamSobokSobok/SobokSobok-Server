@@ -29,6 +29,10 @@ public enum ErrorCode {
     EXCEEDED_PILL_COUNT(HttpStatus.BAD_REQUEST, "약 개수가 초과됐습니다."),
     INVALID_PILL_REQUEST_DATA(HttpStatus.BAD_REQUEST, "허용되지 않은 약 추가 요청 데이터입니다."),
 
+    // friend
+    INVALID_SELF_ADD_FRIEND(HttpStatus.BAD_REQUEST, "자신에게 캘린더 공유 요청을 할 수 없습니다."),
+    ALREADY_FRIEND(HttpStatus.CONFLICT, "이미 캘린더 공유 요청이 되었습니다."),
+
     // external
     INVALID_EXTERNAL_REQUEST_DATA(HttpStatus.BAD_REQUEST, "외부 API 요청에 잘못된 데이터가 전달됐습니다."),
     ;
