@@ -5,6 +5,7 @@ import io.sobok.SobokSobok.common.dto.ApiResponse;
 import io.sobok.SobokSobok.exception.SuccessCode;
 import io.sobok.SobokSobok.friend.application.FriendService;
 import io.sobok.SobokSobok.friend.ui.dto.AddFriendResponse;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -24,6 +25,10 @@ public class FriendController {
     final FriendService friendService;
 
     @PostMapping("")
+    @Operation(
+        summary = "공유 요청 API 메서드",
+        description = "캘린더 공유를 요청하는 메서드입니다."
+    )
     public ResponseEntity<ApiResponse<AddFriendResponse>> addFriend(
         @AuthenticationPrincipal User user,
         @RequestParam final Long memberId,
