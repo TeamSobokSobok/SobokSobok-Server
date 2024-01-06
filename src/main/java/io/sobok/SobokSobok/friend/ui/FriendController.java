@@ -32,13 +32,13 @@ public class FriendController {
     public ResponseEntity<ApiResponse<AddFriendResponse>> addFriend(
         @AuthenticationPrincipal User user,
         @RequestParam final Long memberId,
-        @RequestParam final String memberName
+        @RequestParam final String friendName
     ) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(ApiResponse.success(
                 SuccessCode.ADD_FRIEND_SUCCESS,
-                friendService.addFriend(user.getId(), memberId, memberName)
+                friendService.addFriend(user.getId(), memberId, friendName)
             ));
     }
 }

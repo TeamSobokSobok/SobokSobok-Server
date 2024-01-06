@@ -28,16 +28,14 @@ public class FriendService {
     private final SendFriendRepository sendFriendRepository;
 
     @Transactional
-    public AddFriendResponse addFriend(Long userId, Long memberId, String memberName) {
-        User sender = userRepository.findById(userId)
-            .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_USER));
+    public AddFriendResponse addFriend(Long userId, Long memberId, String friendName) {
+        User sender = validateUser(userId);
 
         if (sender.getId().equals(memberId)) {
             throw new BadRequestException(ErrorCode.INVALID_SELF_ADD_FRIEND);
         }
 
-        User receiver = userRepository.findById(memberId)
-            .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_USER));
+        User receiver = validateUser(memberId);
 
         if (friendRepository.existsBySenderIdAndReceiverId(sender.getId(), receiver.getId())) {
             throw new ConflictException(ErrorCode.ALREADY_FRIEND);
@@ -55,7 +53,7 @@ public class FriendService {
         sendFriendRepository.save(
             SendFriend.newInstance(
                 notice.getId(),
-                memberName
+                friendName
             )
         );
 
@@ -65,5 +63,10 @@ public class FriendService {
             .memberName(receiver.getUsername())
             .isOkay(NoticeStatus.WAITING)
             .build();
+    }
+
+    private User validateUser(Long userId) {
+        return userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_USER));
     }
 }
