@@ -7,6 +7,7 @@ import io.sobok.SobokSobok.exception.model.BadRequestException;
 import io.sobok.SobokSobok.exception.model.ConflictException;
 import io.sobok.SobokSobok.exception.model.NotFoundException;
 import io.sobok.SobokSobok.friend.domain.SendFriend;
+import io.sobok.SobokSobok.friend.infrastructure.FriendQueryRepository;
 import io.sobok.SobokSobok.friend.infrastructure.FriendRepository;
 import io.sobok.SobokSobok.friend.infrastructure.SendFriendRepository;
 import io.sobok.SobokSobok.friend.ui.dto.AddFriendResponse;
@@ -23,7 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class FriendService {
 
     private final UserRepository userRepository;
-    private final FriendRepository friendRepository;
+    private final FriendQueryRepository friendQueryRepository;
     private final NoticeRepository noticeRepository;
     private final SendFriendRepository sendFriendRepository;
 
@@ -37,7 +38,7 @@ public class FriendService {
 
         User receiver = validateUser(memberId);
 
-        if (friendRepository.existsBySenderIdAndReceiverId(sender.getId(), receiver.getId())) {
+        if (friendQueryRepository.isAlreadyFriend(sender.getId(), receiver.getId())) {
             throw new ConflictException(ErrorCode.ALREADY_FRIEND);
         }
 
