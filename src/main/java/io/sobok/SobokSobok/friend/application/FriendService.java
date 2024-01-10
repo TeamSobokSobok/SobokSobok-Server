@@ -5,11 +5,10 @@ import io.sobok.SobokSobok.auth.infrastructure.UserRepository;
 import io.sobok.SobokSobok.exception.ErrorCode;
 import io.sobok.SobokSobok.exception.model.BadRequestException;
 import io.sobok.SobokSobok.exception.model.ConflictException;
+import io.sobok.SobokSobok.exception.model.ForbiddenException;
 import io.sobok.SobokSobok.exception.model.NotFoundException;
-import io.sobok.SobokSobok.exception.model.UnauthorizedException;
 import io.sobok.SobokSobok.friend.domain.Friend;
 import io.sobok.SobokSobok.friend.domain.SendFriend;
-import io.sobok.SobokSobok.friend.infrastructure.FriendQueryRepository;
 import io.sobok.SobokSobok.friend.infrastructure.FriendRepository;
 import io.sobok.SobokSobok.friend.infrastructure.SendFriendRepository;
 import io.sobok.SobokSobok.friend.ui.dto.AddFriendResponse;
@@ -17,6 +16,7 @@ import io.sobok.SobokSobok.friend.ui.dto.HandleFriendRequestResponse;
 import io.sobok.SobokSobok.notice.domain.Notice;
 import io.sobok.SobokSobok.notice.domain.NoticeStatus;
 import io.sobok.SobokSobok.notice.domain.NoticeType;
+import io.sobok.SobokSobok.notice.infrastructure.NoticeQueryRepository;
 import io.sobok.SobokSobok.notice.infrastructure.NoticeRepository;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +28,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class FriendService {
 
     private final UserRepository userRepository;
-    private final FriendQueryRepository friendQueryRepository;
     private final NoticeRepository noticeRepository;
     private final SendFriendRepository sendFriendRepository;
     private final FriendRepository friendRepository;
+    private final NoticeQueryRepository noticeQueryRepository;
 
     @Transactional
     public AddFriendResponse addFriend(Long userId, Long memberId, String friendName) {
@@ -43,7 +43,14 @@ public class FriendService {
 
         User receiver = validateUser(memberId);
 
-        if (friendQueryRepository.isAlreadyFriend(sender.getId(), receiver.getId())) {
+        if (friendRepository.countBySenderId(sender.getId()) >= 5 ||
+            friendRepository.countBySenderId(receiver.getId()) >= 5) {
+            throw new ConflictException(ErrorCode.EXCEEDED_FRIEND_COUNT);
+        }
+
+        if (noticeQueryRepository.isAlreadyFriendRequestFromSender(sender.getId(), receiver.getId())
+            || noticeQueryRepository.isAlreadyFriendRequestFromSender(receiver.getId(),
+            sender.getId())) {
             throw new ConflictException(ErrorCode.ALREADY_FRIEND);
         }
 
@@ -71,20 +78,28 @@ public class FriendService {
             .build();
     }
 
-    @Transactional
-    public HandleFriendRequestResponse updateNoticeStatus(Long userId, Long noticeId, NoticeStatus isOkay) {
+    @Transactional(noRollbackFor = {ConflictException.class})
+    public HandleFriendRequestResponse updateNoticeStatus(Long userId, Long noticeId,
+        NoticeStatus isOkay) {
         validateUser(userId);
 
         Notice notice = noticeRepository.findById(noticeId)
             .orElseThrow(() -> new BadRequestException(ErrorCode.BAD_REQUEST_EXCEPTION));
 
         if (!userId.equals(notice.getReceiverId())) {
-            throw new UnauthorizedException(ErrorCode.UNAUTHORIZED_EXCEPTION);
+            throw new ForbiddenException(ErrorCode.FORBIDDEN_EXCEPTION);
+        }
+
+        User sender = validateUser(notice.getSenderId());
+
+        if (friendRepository.countBySenderId(userId) >= 5 ||
+            friendRepository.countBySenderId(sender.getId()) >= 5) {
+            notice.setIsOkay(NoticeStatus.REFUSE);
+            throw new ConflictException(ErrorCode.EXCEEDED_FRIEND_COUNT);
         }
 
         notice.setIsOkay(isOkay);
 
-        User sender = validateUser(notice.getSenderId());
         if (isOkay == NoticeStatus.ACCEPT) {
             SendFriend sendFriend = sendFriendRepository.findByNoticeId(noticeId);
             friendRepository.save(Friend.newInstance(

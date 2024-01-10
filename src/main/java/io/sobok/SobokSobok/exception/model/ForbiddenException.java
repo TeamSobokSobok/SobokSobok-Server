@@ -2,9 +2,9 @@ package io.sobok.SobokSobok.exception.model;
 
 import io.sobok.SobokSobok.exception.ErrorCode;
 
-public class UnauthorizedException extends SobokException {
+public class ForbiddenException extends SobokException {
 
-    public UnauthorizedException(ErrorCode errorCode) {
+    public ForbiddenException(ErrorCode errorCode) {
         super(errorCode);
     }
 }
