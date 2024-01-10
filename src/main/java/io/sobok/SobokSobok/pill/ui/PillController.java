@@ -55,8 +55,8 @@ public class PillController {
 
     @GetMapping("/count/{userId}")
     @Operation(
-            summary = "타인 약 개수 조회 API 메서드",
-            description = "타인 약의 개수가 몇 개인지 확인하는 메서드입니다."
+            summary = "친구 약 개수 조회 API 메서드",
+            description = "친구 약의 개수가 몇 개인지 확인하는 메서드입니다."
     )
     public ResponseEntity<ApiResponse<Integer>> getUserPillCount(@PathVariable Long userId) {
 
@@ -66,5 +66,22 @@ public class PillController {
                         SuccessCode.GET_PILL_COUNT_SUCCESS,
                         pillService.getPillCount(userId)
                 ));
+    }
+
+    @PostMapping("/friend/{friendId}")
+    @Operation(
+            summary = "친구에게 약 전송 API 메서드",
+            description = "친구에게 약을 전송하는 메서드입니다."
+    )
+    public ResponseEntity<ApiResponse<Void>> sendPillToFriend(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long friendId,
+            @RequestBody @Valid final PillRequest request
+    ) {
+
+        pillService.sendPill(user.getId(), friendId, request);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(ApiResponse.success(SuccessCode.SEND_PILL_SUCCESS));
     }
 }
