@@ -29,6 +29,10 @@ public class Notice extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private NoticeStatus isOkay;
 
+    public void setIsOkay(NoticeStatus isOkay) {
+        this.isOkay = isOkay;
+    }
+
     private Notice(Long senderId, Long receiverId, NoticeType section, NoticeStatus isOkay) {
         this.senderId = senderId;
         this.receiverId = receiverId;
