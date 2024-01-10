@@ -1,12 +1,12 @@
 package io.sobok.SobokSobok.friend.application;
 
+import io.sobok.SobokSobok.auth.application.util.UserServiceUtil;
 import io.sobok.SobokSobok.auth.domain.User;
 import io.sobok.SobokSobok.auth.infrastructure.UserRepository;
 import io.sobok.SobokSobok.exception.ErrorCode;
 import io.sobok.SobokSobok.exception.model.BadRequestException;
 import io.sobok.SobokSobok.exception.model.ConflictException;
 import io.sobok.SobokSobok.exception.model.ForbiddenException;
-import io.sobok.SobokSobok.exception.model.NotFoundException;
 import io.sobok.SobokSobok.friend.domain.Friend;
 import io.sobok.SobokSobok.friend.domain.SendFriend;
 import io.sobok.SobokSobok.friend.infrastructure.FriendRepository;
@@ -35,13 +35,13 @@ public class FriendService {
 
     @Transactional
     public AddFriendResponse addFriend(Long userId, Long memberId, String friendName) {
-        User sender = validateUser(userId);
+        User sender = UserServiceUtil.findUserById(userRepository, userId);
 
         if (sender.getId().equals(memberId)) {
             throw new BadRequestException(ErrorCode.INVALID_SELF_ADD_FRIEND);
         }
 
-        User receiver = validateUser(memberId);
+        User receiver = UserServiceUtil.findUserById(userRepository, memberId);
 
         if (friendRepository.countBySenderId(sender.getId()) >= 5 ||
             friendRepository.countBySenderId(receiver.getId()) >= 5) {
@@ -79,9 +79,8 @@ public class FriendService {
     }
 
     @Transactional(noRollbackFor = {ConflictException.class})
-    public HandleFriendRequestResponse updateNoticeStatus(Long userId, Long noticeId,
-        NoticeStatus isOkay) {
-        validateUser(userId);
+    public HandleFriendRequestResponse updateNoticeStatus(Long userId, Long noticeId, NoticeStatus isOkay) {
+        UserServiceUtil.existsUserById(userRepository, userId);
 
         Notice notice = noticeRepository.findById(noticeId)
             .orElseThrow(() -> new BadRequestException(ErrorCode.BAD_REQUEST_EXCEPTION));
@@ -90,7 +89,7 @@ public class FriendService {
             throw new ForbiddenException(ErrorCode.FORBIDDEN_EXCEPTION);
         }
 
-        User sender = validateUser(notice.getSenderId());
+        User sender = UserServiceUtil.findUserById(userRepository, notice.getSenderId());
 
         if (friendRepository.countBySenderId(userId) >= 5 ||
             friendRepository.countBySenderId(sender.getId()) >= 5) {
@@ -121,10 +120,5 @@ public class FriendService {
             .isOkay(isOkay)
             .updatedAt(LocalDateTime.now())
             .build();
-    }
-
-    private User validateUser(Long userId) {
-        return userRepository.findById(userId)
-            .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_USER));
     }
 }
