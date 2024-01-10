@@ -15,10 +15,10 @@ public class FriendQueryRepository {
         QFriend friend = QFriend.friend;
 
         return queryFactory
-            .selectFrom(friend)
-            .where(
-                friend.senderId.eq(senderId),
-                friend.receiverId.eq(receiverId)
-            ).fetchFirst() != null;
+                .selectFrom(friend)
+                .where(
+                        friend.senderId.eq(senderId),
+                        friend.receiverId.eq(receiverId)
+                ).fetchFirst() != null;
     }
 }

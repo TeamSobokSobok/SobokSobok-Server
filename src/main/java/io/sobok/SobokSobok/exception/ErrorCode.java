@@ -32,6 +32,7 @@ public enum ErrorCode {
     // friend
     INVALID_SELF_ADD_FRIEND(HttpStatus.BAD_REQUEST, "자신에게 캘린더 공유 요청을 할 수 없습니다."),
     ALREADY_FRIEND(HttpStatus.CONFLICT, "이미 캘린더 공유 요청이 되었습니다."),
+    NOT_FRIEND(HttpStatus.FORBIDDEN, "친구 관계가 아닙니다."),
 
     // external
     INVALID_EXTERNAL_REQUEST_DATA(HttpStatus.BAD_REQUEST, "외부 API 요청에 잘못된 데이터가 전달됐습니다."),

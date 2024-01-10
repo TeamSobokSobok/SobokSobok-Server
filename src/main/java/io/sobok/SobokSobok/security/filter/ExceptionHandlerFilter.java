@@ -33,6 +33,7 @@ public class ExceptionHandlerFilter extends OncePerRequestFilter {
         } catch (MalformedJwtException e) {
             setErrorResponse(response, ErrorCode.MALFORMED_TOKEN);
         } catch (IllegalArgumentException e) {
+            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!11");
             setErrorResponse(response, ErrorCode.NULL_TOKEN);
         }
     }

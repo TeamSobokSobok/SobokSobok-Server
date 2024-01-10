@@ -36,7 +36,6 @@ public class Pill extends BaseEntity {
     @Column(nullable = false)
     private String scheduleDay;
 
-    @Column(nullable = false)
     private Long userId;
 
     @Column(nullable = false)
