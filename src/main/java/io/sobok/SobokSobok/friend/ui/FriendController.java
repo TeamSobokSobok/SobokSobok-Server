@@ -5,12 +5,15 @@ import io.sobok.SobokSobok.common.dto.ApiResponse;
 import io.sobok.SobokSobok.exception.SuccessCode;
 import io.sobok.SobokSobok.friend.application.FriendService;
 import io.sobok.SobokSobok.friend.ui.dto.AddFriendResponse;
+import io.sobok.SobokSobok.friend.ui.dto.FriendListResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,6 +42,22 @@ public class FriendController {
             .body(ApiResponse.success(
                 SuccessCode.ADD_FRIEND_SUCCESS,
                 friendService.addFriend(user.getId(), memberId, friendName)
+            ));
+    }
+
+    @GetMapping("")
+    @Operation(
+        summary = "친구 리스트 조회 API 메서드",
+        description = "친구 리스트를 조회하는 메서드입니다."
+    )
+    public ResponseEntity<ApiResponse<List<FriendListResponse>>> getFriendList(
+        @AuthenticationPrincipal User user
+    ) {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(
+                SuccessCode.GET_FRIEND_LIST_SUCCESS,
+                friendService.getFriendList(user.getId())
             ));
     }
 }
