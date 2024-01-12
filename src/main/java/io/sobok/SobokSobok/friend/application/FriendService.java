@@ -11,7 +11,9 @@ import io.sobok.SobokSobok.friend.domain.Friend;
 import io.sobok.SobokSobok.friend.domain.SendFriend;
 import io.sobok.SobokSobok.friend.infrastructure.FriendRepository;
 import io.sobok.SobokSobok.friend.infrastructure.SendFriendRepository;
+import io.sobok.SobokSobok.friend.ui.dto.AddFriendRequest;
 import io.sobok.SobokSobok.friend.ui.dto.AddFriendResponse;
+import io.sobok.SobokSobok.friend.ui.dto.HandleFriendRequest;
 import io.sobok.SobokSobok.friend.ui.dto.HandleFriendRequestResponse;
 import io.sobok.SobokSobok.notice.domain.Notice;
 import io.sobok.SobokSobok.notice.domain.NoticeStatus;
@@ -34,14 +36,14 @@ public class FriendService {
     private final NoticeQueryRepository noticeQueryRepository;
 
     @Transactional
-    public AddFriendResponse addFriend(Long userId, Long memberId, String friendName) {
+    public AddFriendResponse addFriend(Long userId, AddFriendRequest request) {
         User sender = UserServiceUtil.findUserById(userRepository, userId);
 
-        if (sender.getId().equals(memberId)) {
+        if (sender.getId().equals(request.memberId())) {
             throw new BadRequestException(ErrorCode.INVALID_SELF_ADD_FRIEND);
         }
 
-        User receiver = UserServiceUtil.findUserById(userRepository, memberId);
+        User receiver = UserServiceUtil.findUserById(userRepository, request.memberId());
 
         if (friendRepository.countBySenderId(sender.getId()) >= 5 ||
             friendRepository.countBySenderId(receiver.getId()) >= 5) {
@@ -66,7 +68,7 @@ public class FriendService {
         sendFriendRepository.save(
             SendFriend.newInstance(
                 notice.getId(),
-                friendName
+                request.friendName()
             )
         );
 
@@ -79,7 +81,8 @@ public class FriendService {
     }
 
     @Transactional(noRollbackFor = {ConflictException.class})
-    public HandleFriendRequestResponse updateNoticeStatus(Long userId, Long noticeId, NoticeStatus isOkay) {
+    public HandleFriendRequestResponse updateNoticeStatus(Long userId, Long noticeId,
+        HandleFriendRequest request) {
         UserServiceUtil.existsUserById(userRepository, userId);
 
         Notice notice = noticeRepository.findById(noticeId)
@@ -97,9 +100,9 @@ public class FriendService {
             throw new ConflictException(ErrorCode.EXCEEDED_FRIEND_COUNT);
         }
 
-        notice.setIsOkay(isOkay);
+        notice.setIsOkay(request.isOkay());
 
-        if (isOkay == NoticeStatus.ACCEPT) {
+        if (request.isOkay() == NoticeStatus.ACCEPT) {
             SendFriend sendFriend = sendFriendRepository.findByNoticeId(noticeId);
             friendRepository.save(Friend.newInstance(
                 sender.getId(),
@@ -117,7 +120,7 @@ public class FriendService {
         return HandleFriendRequestResponse.builder()
             .noticeId(notice.getId())
             .memberName(sender.getUsername())
-            .isOkay(isOkay)
+            .isOkay(request.isOkay())
             .updatedAt(LocalDateTime.now())
             .build();
     }

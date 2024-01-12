@@ -4,11 +4,13 @@ import io.sobok.SobokSobok.auth.domain.User;
 import io.sobok.SobokSobok.common.dto.ApiResponse;
 import io.sobok.SobokSobok.exception.SuccessCode;
 import io.sobok.SobokSobok.friend.application.FriendService;
+import io.sobok.SobokSobok.friend.ui.dto.AddFriendRequest;
 import io.sobok.SobokSobok.friend.ui.dto.AddFriendResponse;
+import io.sobok.SobokSobok.friend.ui.dto.HandleFriendRequest;
 import io.sobok.SobokSobok.friend.ui.dto.HandleFriendRequestResponse;
-import io.sobok.SobokSobok.notice.domain.NoticeStatus;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +18,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -35,14 +37,13 @@ public class FriendController {
     )
     public ResponseEntity<ApiResponse<AddFriendResponse>> addFriend(
         @AuthenticationPrincipal User user,
-        @RequestParam final Long memberId,
-        @RequestParam final String friendName
+        @RequestBody @Valid final AddFriendRequest request
     ) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(ApiResponse.success(
                 SuccessCode.ADD_FRIEND_SUCCESS,
-                friendService.addFriend(user.getId(), memberId, friendName)
+                friendService.addFriend(user.getId(), request)
             ));
     }
 
@@ -54,13 +55,13 @@ public class FriendController {
     public ResponseEntity<ApiResponse<HandleFriendRequestResponse>> handleFriendRequest(
         @AuthenticationPrincipal User user,
         @PathVariable Long noticeId,
-        @RequestParam NoticeStatus isOkay
+        @RequestBody @Valid HandleFriendRequest request
     ) {
         return ResponseEntity
             .status(HttpStatus.OK)
             .body(ApiResponse.success(
                 SuccessCode.HANDLE_FRIEND_REQUEST_SUCCESS,
-                friendService.updateNoticeStatus(user.getId(), noticeId, isOkay)
+                friendService.updateNoticeStatus(user.getId(), noticeId, request)
             ));
     }
 }
