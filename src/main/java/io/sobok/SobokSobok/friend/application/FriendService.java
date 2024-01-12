@@ -72,6 +72,7 @@ public class FriendService {
             .build();
     }
 
+    @Transactional(readOnly = true)
     public List<FriendListResponse> getFriendList(Long userId) {
         UserServiceUtil.existsUserById(userRepository, userId);
 
