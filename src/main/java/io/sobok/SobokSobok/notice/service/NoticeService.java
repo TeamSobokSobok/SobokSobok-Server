@@ -25,7 +25,7 @@ public class NoticeService {
 
         User user = UserServiceUtil.findUserById(userRepository, userId);
 
-        List<NoticeInfo> noticeList = noticeQueryRepository.getNoticeList(5L);
+        List<NoticeInfo> noticeList = noticeQueryRepository.getNoticeList(userId);
 
         return NoticeResponse.builder()
                 .username(user.getUsername())
