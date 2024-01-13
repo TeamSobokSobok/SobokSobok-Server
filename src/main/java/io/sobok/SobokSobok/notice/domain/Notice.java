@@ -43,4 +43,12 @@ public class Notice extends BaseEntity {
     public static Notice newInstance(Long senderId, Long receiverId, NoticeType section, NoticeStatus isOkay) {
         return new Notice(senderId, receiverId, section, isOkay);
     }
+
+    public Boolean isPillNotice() {
+        return this.section == NoticeType.PILL;
+    }
+
+    public Boolean isCompleteNotice() {
+        return this.isOkay.equals(NoticeStatus.ACCEPT) || this.isOkay.equals(NoticeStatus.REFUSE);
+    }
 }
