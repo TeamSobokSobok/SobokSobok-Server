@@ -6,18 +6,22 @@ import io.sobok.SobokSobok.auth.infrastructure.UserRepository;
 import io.sobok.SobokSobok.exception.ErrorCode;
 import io.sobok.SobokSobok.exception.model.BadRequestException;
 import io.sobok.SobokSobok.exception.model.ConflictException;
-import io.sobok.SobokSobok.exception.model.NotFoundException;
+import io.sobok.SobokSobok.exception.model.ForbiddenException;
 import io.sobok.SobokSobok.friend.domain.Friend;
 import io.sobok.SobokSobok.friend.domain.SendFriend;
-import io.sobok.SobokSobok.friend.infrastructure.FriendQueryRepository;
 import io.sobok.SobokSobok.friend.infrastructure.FriendRepository;
 import io.sobok.SobokSobok.friend.infrastructure.SendFriendRepository;
+import io.sobok.SobokSobok.friend.ui.dto.AddFriendRequest;
 import io.sobok.SobokSobok.friend.ui.dto.AddFriendResponse;
 import io.sobok.SobokSobok.friend.ui.dto.FriendListResponse;
+import io.sobok.SobokSobok.friend.ui.dto.HandleFriendRequest;
+import io.sobok.SobokSobok.friend.ui.dto.HandleFriendRequestResponse;
 import io.sobok.SobokSobok.notice.domain.Notice;
 import io.sobok.SobokSobok.notice.domain.NoticeStatus;
 import io.sobok.SobokSobok.notice.domain.NoticeType;
+import io.sobok.SobokSobok.notice.infrastructure.NoticeQueryRepository;
 import io.sobok.SobokSobok.notice.infrastructure.NoticeRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -29,22 +33,29 @@ import org.springframework.transaction.annotation.Transactional;
 public class FriendService {
 
     private final UserRepository userRepository;
-    private final FriendQueryRepository friendQueryRepository;
     private final NoticeRepository noticeRepository;
     private final SendFriendRepository sendFriendRepository;
     private final FriendRepository friendRepository;
+    private final NoticeQueryRepository noticeQueryRepository;
 
     @Transactional
-    public AddFriendResponse addFriend(Long userId, Long memberId, String friendName) {
-        User sender = validateUser(userId);
+    public AddFriendResponse addFriend(Long userId, AddFriendRequest request) {
+        User sender = UserServiceUtil.findUserById(userRepository, userId);
 
-        if (sender.getId().equals(memberId)) {
+        if (sender.getId().equals(request.memberId())) {
             throw new BadRequestException(ErrorCode.INVALID_SELF_ADD_FRIEND);
         }
 
-        User receiver = validateUser(memberId);
+        User receiver = UserServiceUtil.findUserById(userRepository, request.memberId());
 
-        if (friendQueryRepository.isAlreadyFriend(sender.getId(), receiver.getId())) {
+        if (friendRepository.countBySenderId(sender.getId()) >= 5 ||
+            friendRepository.countBySenderId(receiver.getId()) >= 5) {
+            throw new ConflictException(ErrorCode.EXCEEDED_FRIEND_COUNT);
+        }
+
+        if (noticeQueryRepository.isAlreadyFriendRequestFromSender(sender.getId(), receiver.getId())
+            || noticeQueryRepository.isAlreadyFriendRequestFromSender(receiver.getId(),
+            sender.getId())) {
             throw new ConflictException(ErrorCode.ALREADY_FRIEND);
         }
 
@@ -60,7 +71,7 @@ public class FriendService {
         sendFriendRepository.save(
             SendFriend.newInstance(
                 notice.getId(),
-                friendName
+                request.friendName()
             )
         );
 
@@ -86,8 +97,48 @@ public class FriendService {
             ).collect(Collectors.toList());
     }
 
-    private User validateUser(Long userId) {
-        return userRepository.findById(userId)
-            .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_USER));
+    @Transactional(noRollbackFor = {ConflictException.class})
+    public HandleFriendRequestResponse updateNoticeStatus(Long userId, Long noticeId,
+        HandleFriendRequest request) {
+        UserServiceUtil.existsUserById(userRepository, userId);
+
+        Notice notice = noticeRepository.findById(noticeId)
+            .orElseThrow(() -> new BadRequestException(ErrorCode.BAD_REQUEST_EXCEPTION));
+
+        if (!userId.equals(notice.getReceiverId())) {
+            throw new ForbiddenException(ErrorCode.FORBIDDEN_EXCEPTION);
+        }
+
+        User sender = UserServiceUtil.findUserById(userRepository, notice.getSenderId());
+
+        if (friendRepository.countBySenderId(userId) >= 5 ||
+            friendRepository.countBySenderId(sender.getId()) >= 5) {
+            notice.setIsOkay(NoticeStatus.REFUSE);
+            throw new ConflictException(ErrorCode.EXCEEDED_FRIEND_COUNT);
+        }
+
+        notice.setIsOkay(request.isOkay());
+
+        if (request.isOkay() == NoticeStatus.ACCEPT) {
+            SendFriend sendFriend = sendFriendRepository.findByNoticeId(noticeId);
+            friendRepository.save(Friend.newInstance(
+                sender.getId(),
+                userId,
+                sendFriend.getFriendName()
+            ));
+
+            friendRepository.save(Friend.newInstance(
+                userId,
+                sender.getId(),
+                sender.getUsername()
+            ));
+        }
+
+        return HandleFriendRequestResponse.builder()
+            .noticeId(notice.getId())
+            .memberName(sender.getUsername())
+            .isOkay(request.isOkay())
+            .updatedAt(LocalDateTime.now())
+            .build();
     }
 }

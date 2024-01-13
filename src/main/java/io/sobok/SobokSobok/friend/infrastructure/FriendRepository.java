@@ -5,5 +5,8 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface FriendRepository extends JpaRepository<Friend, Long> {
+
     List<Friend> findAllBySenderId(Long senderId);
+
+    Integer countBySenderId(Long senderId);
 }

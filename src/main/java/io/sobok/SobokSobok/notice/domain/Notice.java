@@ -29,6 +29,10 @@ public class Notice extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private NoticeStatus isOkay;
 
+    public void setIsOkay(NoticeStatus isOkay) {
+        this.isOkay = isOkay;
+    }
+
     private Notice(Long senderId, Long receiverId, NoticeType section, NoticeStatus isOkay) {
         this.senderId = senderId;
         this.receiverId = receiverId;
@@ -38,5 +42,13 @@ public class Notice extends BaseEntity {
 
     public static Notice newInstance(Long senderId, Long receiverId, NoticeType section, NoticeStatus isOkay) {
         return new Notice(senderId, receiverId, section, isOkay);
+    }
+
+    public Boolean isPillNotice() {
+        return this.section == NoticeType.PILL;
+    }
+
+    public Boolean isCompleteNotice() {
+        return this.isOkay.equals(NoticeStatus.ACCEPT) || this.isOkay.equals(NoticeStatus.REFUSE);
     }
 }
