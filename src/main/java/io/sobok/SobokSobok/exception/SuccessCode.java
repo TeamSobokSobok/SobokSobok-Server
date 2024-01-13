@@ -25,6 +25,7 @@ public enum SuccessCode {
 
     // friend
     ADD_FRIEND_SUCCESS(HttpStatus.OK, "공유 요청에 성공했습니다."),
+    HANDLE_FRIEND_REQUEST_SUCCESS(HttpStatus.OK, "공유 응답에 성공했습니다."),
 
     // notice
     GET_NOTICE_LIST_SUCCESS(HttpStatus.OK, "알림 리스트 조회에 성공했습니다."),

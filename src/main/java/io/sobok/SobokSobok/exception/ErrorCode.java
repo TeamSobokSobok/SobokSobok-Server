@@ -12,6 +12,7 @@ public enum ErrorCode {
     INVALID_REQUEST_BODY(HttpStatus.BAD_REQUEST, "잘못된 Request body입니다."),
     BAD_REQUEST_EXCEPTION(HttpStatus.BAD_REQUEST, "잘못된 형식의 요청입니다."),
     FILE_SAVE_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "파일 생성에 실패했습니다."),
+    FORBIDDEN_EXCEPTION(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
 
     // auth
     UNREGISTERED_USER(HttpStatus.NOT_FOUND, "등록되지 않은 사용자입니다."),
@@ -35,6 +36,7 @@ public enum ErrorCode {
     // friend
     INVALID_SELF_ADD_FRIEND(HttpStatus.BAD_REQUEST, "자신에게 캘린더 공유 요청을 할 수 없습니다."),
     ALREADY_FRIEND(HttpStatus.CONFLICT, "이미 캘린더 공유 요청이 되었습니다."),
+    EXCEEDED_FRIEND_COUNT(HttpStatus.CONFLICT, "친구 수가 초과됐습니다."),
     NOT_FRIEND(HttpStatus.FORBIDDEN, "친구 관계가 아닙니다."),
 
     // notice
