@@ -17,6 +17,7 @@ public enum SuccessCode {
 
     // user
     NICKNAME_CHECK_SUCCESS(HttpStatus.OK, "닉네임 중복 확인에 성공했습니다."),
+    GET_USERNAME_SUCCESS(HttpStatus.OK, "유저 이름 조회에 성공했습니다."),
 
     // pill
     ADD_PILL_SUCCESS(HttpStatus.CREATED, "약 추가에 성공했습니다."),
