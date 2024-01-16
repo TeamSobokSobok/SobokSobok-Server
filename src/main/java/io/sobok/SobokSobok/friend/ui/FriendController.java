@@ -8,6 +8,8 @@ import io.sobok.SobokSobok.friend.ui.dto.AddFriendRequest;
 import io.sobok.SobokSobok.friend.ui.dto.AddFriendResponse;
 import io.sobok.SobokSobok.friend.ui.dto.HandleFriendRequest;
 import io.sobok.SobokSobok.friend.ui.dto.HandleFriendRequestResponse;
+import io.sobok.SobokSobok.friend.ui.dto.UpdateFriendName;
+import io.sobok.SobokSobok.friend.ui.dto.UpdateFriendNameResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -62,6 +64,24 @@ public class FriendController {
             .body(ApiResponse.success(
                 SuccessCode.HANDLE_FRIEND_REQUEST_SUCCESS,
                 friendService.updateNoticeStatus(user.getId(), noticeId, request)
+            ));
+    }
+
+    @PutMapping("/{friendId}/name")
+    @Operation(
+        summary = "공유 친구 이름 수정 API 메서드",
+        description = "친구 이름을 수정하는 메서드입니다."
+    )
+    public ResponseEntity<ApiResponse<UpdateFriendNameResponse>> updateFriendName(
+        @AuthenticationPrincipal User user,
+        @PathVariable Long friendId,
+        @RequestBody @Valid UpdateFriendName request
+    ){
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(
+                SuccessCode.UPDATE_FRIEND_NAME_SUCCESS,
+                friendService.updateFriendName(user.getId(), friendId, request)
             ));
     }
 }

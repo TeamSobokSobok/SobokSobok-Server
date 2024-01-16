@@ -33,4 +33,8 @@ public class Friend extends BaseEntity {
     public static Friend newInstance(Long senderId, Long receiverId, String friendName) {
         return new Friend(senderId, receiverId, friendName);
     }
+
+    public void updateFriendName(String friendName) {
+        this.friendName = friendName;
+    }
 }
