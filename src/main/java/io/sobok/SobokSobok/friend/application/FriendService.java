@@ -14,6 +14,7 @@ import io.sobok.SobokSobok.friend.infrastructure.FriendRepository;
 import io.sobok.SobokSobok.friend.infrastructure.SendFriendRepository;
 import io.sobok.SobokSobok.friend.ui.dto.AddFriendRequest;
 import io.sobok.SobokSobok.friend.ui.dto.AddFriendResponse;
+import io.sobok.SobokSobok.friend.ui.dto.FriendListResponse;
 import io.sobok.SobokSobok.friend.ui.dto.HandleFriendRequest;
 import io.sobok.SobokSobok.friend.ui.dto.HandleFriendRequestResponse;
 import io.sobok.SobokSobok.friend.ui.dto.UpdateFriendName;
@@ -24,6 +25,8 @@ import io.sobok.SobokSobok.notice.domain.NoticeType;
 import io.sobok.SobokSobok.notice.infrastructure.NoticeQueryRepository;
 import io.sobok.SobokSobok.notice.infrastructure.NoticeRepository;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -81,6 +84,20 @@ public class FriendService {
             .memberName(receiver.getUsername())
             .isOkay(NoticeStatus.WAITING)
             .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<FriendListResponse> getFriendList(Long userId) {
+        UserServiceUtil.existsUserById(userRepository, userId);
+
+        return friendRepository.findAllBySenderId(userId)
+            .stream().map(friend ->
+                FriendListResponse.builder()
+                    .friendId(friend.getId())
+                    .memberId(friend.getReceiverId())
+                    .friendName(friend.getFriendName())
+                    .build()
+            ).collect(Collectors.toList());
     }
 
     @Transactional(noRollbackFor = {ConflictException.class})
