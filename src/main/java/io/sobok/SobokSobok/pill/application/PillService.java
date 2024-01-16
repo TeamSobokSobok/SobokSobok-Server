@@ -126,6 +126,20 @@ public class PillService {
         return pillQueryRepository.getPillCount(userId);
     }
 
+    @Transactional
+    public void deletePill(Long userId, Long pillId) {
+
+        UserServiceUtil.existsUserById(userRepository, userId);
+        Pill pill = PillServiceUtil.findPillById(pillRepository, pillId);
+
+        if (!pill.isPillUser(userId)) {
+            throw new ForbiddenException(ErrorCode.UNAUTHORIZED_PILL);
+        }
+
+        pillRepository.delete(pill);
+        pillScheduleRepository.deleteAllByPillId(pillId);
+    }
+
     private void validatePillCount(Long userId, int requestPillCount) {
         if (pillQueryRepository.getPillCount(userId) + requestPillCount > 5) {
             throw new BadRequestException(ErrorCode.EXCEEDED_PILL_COUNT);

@@ -84,4 +84,17 @@ public class PillController {
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(SuccessCode.SEND_PILL_SUCCESS));
     }
+
+    @DeleteMapping("/{pillId}")
+    @Operation(
+            summary = "약 삭제 API 메서드",
+            description = "내 약을 삭제하는 메서드입니다."
+    )
+    public ResponseEntity<ApiResponse<Void>> deletePill(@AuthenticationPrincipal User user, @PathVariable Long pillId) {
+
+        pillService.deletePill(user.getId(), pillId);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(SuccessCode.DELETE_PILL_SUCCESS));
+    }
 }
