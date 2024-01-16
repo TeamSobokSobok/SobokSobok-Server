@@ -7,6 +7,7 @@ import io.sobok.SobokSobok.exception.ErrorCode;
 import io.sobok.SobokSobok.exception.model.BadRequestException;
 import io.sobok.SobokSobok.exception.model.ConflictException;
 import io.sobok.SobokSobok.exception.model.ForbiddenException;
+import io.sobok.SobokSobok.exception.model.NotFoundException;
 import io.sobok.SobokSobok.friend.domain.Friend;
 import io.sobok.SobokSobok.friend.domain.SendFriend;
 import io.sobok.SobokSobok.friend.infrastructure.FriendRepository;
@@ -16,6 +17,8 @@ import io.sobok.SobokSobok.friend.ui.dto.AddFriendResponse;
 import io.sobok.SobokSobok.friend.ui.dto.FriendListResponse;
 import io.sobok.SobokSobok.friend.ui.dto.HandleFriendRequest;
 import io.sobok.SobokSobok.friend.ui.dto.HandleFriendRequestResponse;
+import io.sobok.SobokSobok.friend.ui.dto.UpdateFriendName;
+import io.sobok.SobokSobok.friend.ui.dto.UpdateFriendNameResponse;
 import io.sobok.SobokSobok.notice.domain.Notice;
 import io.sobok.SobokSobok.notice.domain.NoticeStatus;
 import io.sobok.SobokSobok.notice.domain.NoticeType;
@@ -139,6 +142,27 @@ public class FriendService {
             .memberName(sender.getUsername())
             .isOkay(request.isOkay())
             .updatedAt(LocalDateTime.now())
+            .build();
+    }
+
+    @Transactional
+    public UpdateFriendNameResponse updateFriendName(Long userId, Long friendId, UpdateFriendName request) {
+        UserServiceUtil.existsUserById(userRepository, userId);
+
+        Friend friend = friendRepository.findById(friendId)
+            .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_EXCEPTION));
+
+        if (!friend.getSenderId().equals(userId)) {
+            throw new ForbiddenException(ErrorCode.FORBIDDEN_EXCEPTION);
+        }
+
+        friend.updateFriendName(request.friendName());
+
+        return UpdateFriendNameResponse.builder()
+            .friendId(friendId)
+            .userId(userId)
+            .memberId(friend.getReceiverId())
+            .friendName(request.friendName())
             .build();
     }
 }
