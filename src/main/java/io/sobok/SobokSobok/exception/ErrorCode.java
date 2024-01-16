@@ -31,6 +31,7 @@ public enum ErrorCode {
     INVALID_PILL_REQUEST_DATA(HttpStatus.BAD_REQUEST, "허용되지 않은 약 추가 요청 데이터입니다."),
     UNREGISTERED_PILL(HttpStatus.NOT_FOUND, "등록되지 않은 약입니다."),
     UNAUTHORIZED_PILL(HttpStatus.FORBIDDEN, "접근 권한이 없는 약입니다."),
+    NOT_SEND_PILL(HttpStatus.NOT_FOUND, "전송된 적이 없는 약입니다."),
 
 
     // friend

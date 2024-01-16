@@ -4,18 +4,17 @@ import io.sobok.SobokSobok.auth.domain.User;
 import io.sobok.SobokSobok.common.dto.ApiResponse;
 import io.sobok.SobokSobok.exception.SuccessCode;
 import io.sobok.SobokSobok.notice.application.NoticeService;
+import io.sobok.SobokSobok.notice.ui.dto.CompletePillNoticeRequest;
 import io.sobok.SobokSobok.notice.ui.dto.NoticeResponse;
 import io.sobok.SobokSobok.notice.ui.dto.ReceivePillInfoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -56,6 +55,25 @@ public class NoticeController {
                 .body(ApiResponse.success(
                         SuccessCode.GET_RECEIVE_PILL_INFO_SUCCESS,
                         noticeService.getReceivePillInfo(user.getId(), noticeId, pillId)
+                ));
+    }
+
+    @PutMapping("/list/{pillId}")
+    @Operation(
+            summary = "전달받은 약 수락 | 거절 API 메서드",
+            description = "친구에게 전달받은 약을 수락 또는 거절하는 메서드입니다."
+    )
+    public ResponseEntity<ApiResponse<Void>> completePillNotice(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long pillId,
+            @RequestBody @Valid final CompletePillNoticeRequest request
+    ) {
+
+        noticeService.completePillNotice(5L, pillId, request.isOkay());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        SuccessCode.COMPLETE_PILL_NOTICE
                 ));
     }
 }

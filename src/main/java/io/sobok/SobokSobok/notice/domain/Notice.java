@@ -51,4 +51,8 @@ public class Notice extends BaseEntity {
     public Boolean isCompleteNotice() {
         return this.isOkay.equals(NoticeStatus.ACCEPT) || this.isOkay.equals(NoticeStatus.REFUSE);
     }
+
+    public void changeNoticeStatus(NoticeStatus isOkay) {
+        this.isOkay = isOkay;
+    }
 }

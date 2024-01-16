@@ -52,4 +52,8 @@ public class Pill extends BaseEntity {
         this.scheduleDay = scheduleDay;
         this.userId = userId;
     }
+
+    public void receivePill(Long userId) {
+        this.userId = userId;
+    }
 }
