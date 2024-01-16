@@ -1,13 +1,17 @@
 package io.sobok.SobokSobok.auth.ui;
 
 import io.sobok.SobokSobok.auth.application.UserService;
+import io.sobok.SobokSobok.auth.domain.User;
+import io.sobok.SobokSobok.auth.ui.dto.UsernameResponse;
 import io.sobok.SobokSobok.common.dto.ApiResponse;
 import io.sobok.SobokSobok.exception.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -31,5 +35,22 @@ public class UserController {
                         SuccessCode.NICKNAME_CHECK_SUCCESS,
                         userService.duplicateNickname(username)
                 ));
+    }
+
+    @GetMapping("/search")
+    @Operation(
+        summary = "유저 닉네임 조회 API 메서드",
+        description = "공유 멤버(유저) 닉네임을 조회하는 메서드입니다."
+    )
+    public ResponseEntity<ApiResponse<List<UsernameResponse>>> getUsername(
+        @AuthenticationPrincipal User user,
+        @RequestParam final String username
+    ) {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(
+                SuccessCode.GET_USERNAME_SUCCESS,
+                userService.getUsername(user.getId(), username)
+            ));
     }
 }
