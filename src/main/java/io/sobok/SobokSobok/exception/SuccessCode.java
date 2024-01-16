@@ -22,6 +22,7 @@ public enum SuccessCode {
     ADD_PILL_SUCCESS(HttpStatus.CREATED, "약 추가에 성공했습니다."),
     GET_PILL_COUNT_SUCCESS(HttpStatus.OK, "약 개수 조회에 성공했습니다."),
     SEND_PILL_SUCCESS(HttpStatus.CREATED, "약 전송에 성공했습니다."),
+    DELETE_PILL_SUCCESS(HttpStatus.OK, "약 삭제에 성공했습니다."),
 
     // friend
     ADD_FRIEND_SUCCESS(HttpStatus.OK, "공유 요청에 성공했습니다."),
@@ -31,6 +32,7 @@ public enum SuccessCode {
     // notice
     GET_NOTICE_LIST_SUCCESS(HttpStatus.OK, "알림 리스트 조회에 성공했습니다."),
     GET_RECEIVE_PILL_INFO_SUCCESS(HttpStatus.OK, "전달받은 약 정보 조회에 성공했습니다."),
+    COMPLETE_PILL_NOTICE(HttpStatus.OK, "약 알림 처리를 완료했습니다."),
     ;
 
     private final HttpStatus code;
