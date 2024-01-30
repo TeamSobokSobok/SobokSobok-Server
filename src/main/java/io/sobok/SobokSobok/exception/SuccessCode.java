@@ -24,6 +24,8 @@ public enum SuccessCode {
     GET_PILL_COUNT_SUCCESS(HttpStatus.OK, "약 개수 조회에 성공했습니다."),
     SEND_PILL_SUCCESS(HttpStatus.CREATED, "약 전송에 성공했습니다."),
     DELETE_PILL_SUCCESS(HttpStatus.OK, "약 삭제에 성공했습니다."),
+    CHECK_PILL_SCHEDULE_SUCCESS(HttpStatus.OK, "복용 완료 체크에 성공했습니다."),
+    UNCHECK_PILL_SCHEDULE_SUCCESS(HttpStatus.OK, "복용 체크 취소에 성공했습니다."),
 
     // friend
     ADD_FRIEND_SUCCESS(HttpStatus.OK, "공유 요청에 성공했습니다."),

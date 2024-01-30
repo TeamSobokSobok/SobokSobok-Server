@@ -40,4 +40,8 @@ public class PillSchedule extends BaseEntity {
         this.scheduleTime = scheduleTime;
         this.pillId = pillId;
     }
+
+    public void changePillScheduleCheck(Boolean isCheck) {
+        this.isCheck = isCheck;
+    }
 }
