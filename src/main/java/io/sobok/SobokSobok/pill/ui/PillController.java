@@ -4,6 +4,7 @@ import io.sobok.SobokSobok.auth.domain.User;
 import io.sobok.SobokSobok.common.dto.ApiResponse;
 import io.sobok.SobokSobok.exception.SuccessCode;
 import io.sobok.SobokSobok.pill.application.PillService;
+import io.sobok.SobokSobok.pill.ui.dto.PillListResponse;
 import io.sobok.SobokSobok.pill.ui.dto.PillRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -13,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -96,5 +99,22 @@ public class PillController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(SuccessCode.DELETE_PILL_SUCCESS));
+    }
+
+    @GetMapping("/list")
+    @Operation(
+            summary = "약 리스트 조회 API 메서드",
+            description = "내 약의 리스트를 조회하는 메서드입니다."
+    )
+    public ResponseEntity<ApiResponse<List<PillListResponse>>> getPillList(@AuthenticationPrincipal User user) {
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(
+                        ApiResponse.success(
+                                SuccessCode.GET_PILL_LIST_SUCCESS,
+                                pillService.getPillList(user.getId())
+                        )
+                );
     }
 }
