@@ -6,6 +6,7 @@ import io.sobok.SobokSobok.exception.SuccessCode;
 import io.sobok.SobokSobok.pill.application.PillService;
 import io.sobok.SobokSobok.pill.ui.dto.PillListResponse;
 import io.sobok.SobokSobok.pill.ui.dto.PillRequest;
+import io.sobok.SobokSobok.pill.ui.dto.PillResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -116,5 +117,23 @@ public class PillController {
                                 pillService.getPillList(user.getId())
                         )
                 );
+    }
+
+    @GetMapping("/{pillId}")
+    @Operation(
+            summary = "내 약 상세조회 API 메서드",
+            description = "내 약의 상세 정보를 조회하는 메서드입니다."
+    )
+    public ResponseEntity<ApiResponse<PillResponse>> getPillInfo(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long pillId
+    ) {
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        SuccessCode.GET_PILL_INFO_SUCCESS,
+                        pillService.getPillInfo(user.getId(), pillId)
+                ));
     }
 }
