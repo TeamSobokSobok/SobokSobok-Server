@@ -103,4 +103,22 @@ public class FriendController {
                 friendService.updateFriendName(user.getId(), friendId, request)
             ));
     }
+
+    @GetMapping("/request/{friendId}")
+    @Operation(
+            summary = "친구 신청 여부 확인 API 메서드",
+            description = "친구 신청을 했는지 확인하는 메서드입니다."
+    )
+    public ResponseEntity<ApiResponse<Boolean>> checkFriendRequest(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long friendId
+    ) {
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        SuccessCode.GET_REQUEST_FRIEND_SUCCESS,
+                        friendService.checkFriendRequest(user.getId(), friendId)
+                ));
+    }
 }
