@@ -20,6 +20,7 @@ public enum ErrorCode {
     NOT_LOGGED_IN_USER(HttpStatus.NOT_FOUND, "로그인되지 않은 사용자입니다."),
     ALREADY_EXISTS_USER(HttpStatus.CONFLICT, "이미 회원가입이 완료된 사용자입니다."),
     ALREADY_USING_USERNAME(HttpStatus.CONFLICT, "이미 사용중인 username입니다."),
+    EMPTY_DEVICE_TOKEN(HttpStatus.NOT_FOUND, "디바이스 토큰이 존재하지 않습니다."),
 
     // jwt
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
