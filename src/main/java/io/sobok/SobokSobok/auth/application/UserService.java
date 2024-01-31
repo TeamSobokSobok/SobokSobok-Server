@@ -7,6 +7,9 @@ import io.sobok.SobokSobok.auth.ui.dto.UsernameResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import io.sobok.SobokSobok.exception.ErrorCode;
+import io.sobok.SobokSobok.exception.model.ConflictException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,5 +44,17 @@ public class UserService {
         );
 
         return result;
+    }
+
+    @Transactional
+    public void changeUsername(Long userId, String username) {
+
+        User user = UserServiceUtil.findUserById(userRepository, userId);
+
+        if (duplicateNickname(username)) {
+            throw new ConflictException(ErrorCode.ALREADY_USING_USERNAME);
+        }
+
+        user.changeUsername(username);
     }
 }
