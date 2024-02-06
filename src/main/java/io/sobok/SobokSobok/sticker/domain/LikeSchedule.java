@@ -6,6 +6,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,5 +37,13 @@ public class LikeSchedule extends BaseEntity {
         this.scheduleId = scheduleId;
         this.senderId = senderId;
         this.stickerId = stickerId;
+    }
+
+    public void changeSticker(Long stickerId) {
+        this.stickerId = stickerId;
+    }
+
+    public Boolean isLikeScheduleSender(Long userId) {
+        return Objects.equals(senderId, userId);
     }
 }

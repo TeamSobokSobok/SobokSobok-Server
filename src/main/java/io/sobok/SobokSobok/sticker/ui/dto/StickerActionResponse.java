@@ -4,8 +4,8 @@ import java.time.LocalDateTime;
 import lombok.Builder;
 
 @Builder
-public record SendStickerResponse(
-    Long id,
+public record StickerActionResponse(
+    Long likeScheduleId,
     Long scheduleId,
     Long senderId,
     Long stickerId,
