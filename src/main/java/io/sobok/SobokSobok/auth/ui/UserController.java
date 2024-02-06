@@ -2,12 +2,15 @@ package io.sobok.SobokSobok.auth.ui;
 
 import io.sobok.SobokSobok.auth.application.UserService;
 import io.sobok.SobokSobok.auth.domain.User;
+import io.sobok.SobokSobok.auth.ui.dto.UsernameRequest;
 import io.sobok.SobokSobok.auth.ui.dto.UsernameResponse;
 import io.sobok.SobokSobok.common.dto.ApiResponse;
 import io.sobok.SobokSobok.exception.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,5 +55,23 @@ public class UserController {
                 SuccessCode.GET_USERNAME_SUCCESS,
                 userService.getUsername(user.getId(), username)
             ));
+    }
+
+    @PutMapping("/nickname")
+    @Operation(
+            summary = "유저 닉네임 변경 API 메서드",
+            description = "유저 본인의 닉네임을 변경하는 메서드입니다."
+    )
+    public ResponseEntity<ApiResponse<Void>> changeUsername(
+            @AuthenticationPrincipal User user,
+            @RequestBody @Valid final UsernameRequest request
+    ) {
+
+        userService.changeUsername(user.getId(), request.username());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        SuccessCode.CHANGE_NICKNAME_SUCCESS
+                ));
     }
 }

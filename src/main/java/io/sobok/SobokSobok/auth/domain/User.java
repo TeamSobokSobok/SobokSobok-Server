@@ -58,6 +58,10 @@ public class User extends BaseEntity implements UserDetails {
         this.deviceToken = newDeviceToken;
     }
 
+    public void changeUsername(String username) {
+        this.username = username;
+    }
+
     public void deleteUser() {
         this.deviceToken = "";
         this.username = "";

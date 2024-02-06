@@ -17,11 +17,14 @@ public enum SuccessCode {
 
     // user
     NICKNAME_CHECK_SUCCESS(HttpStatus.OK, "닉네임 중복 확인에 성공했습니다."),
+    CHANGE_NICKNAME_SUCCESS(HttpStatus.OK, "닉네임 변경에 성공했습니다."),
     GET_USERNAME_SUCCESS(HttpStatus.OK, "유저 이름 조회에 성공했습니다."),
 
     // pill
     ADD_PILL_SUCCESS(HttpStatus.CREATED, "약 추가에 성공했습니다."),
     GET_PILL_COUNT_SUCCESS(HttpStatus.OK, "약 개수 조회에 성공했습니다."),
+    GET_PILL_LIST_SUCCESS(HttpStatus.OK, "약 리스트 조회에 성공했습니다."),
+    GET_PILL_INFO_SUCCESS(HttpStatus.OK, "약 정보 조회에 성공했습니다."),
     SEND_PILL_SUCCESS(HttpStatus.CREATED, "약 전송에 성공했습니다."),
     DELETE_PILL_SUCCESS(HttpStatus.OK, "약 삭제에 성공했습니다."),
     CHECK_PILL_SCHEDULE_SUCCESS(HttpStatus.OK, "복용 완료 체크에 성공했습니다."),
@@ -32,6 +35,7 @@ public enum SuccessCode {
     GET_FRIEND_LIST_SUCCESS(HttpStatus.OK, "친구 리스트 조회에 성공했습니다."),
     HANDLE_FRIEND_REQUEST_SUCCESS(HttpStatus.OK, "공유 응답에 성공했습니다."),
     UPDATE_FRIEND_NAME_SUCCESS(HttpStatus.OK, "멤버 이름 수정에 성공했습니다."),
+    GET_REQUEST_FRIEND_SUCCESS(HttpStatus.OK, "친구 요청 여부 조회에 성공했습니다."),
 
     // notice
     GET_NOTICE_LIST_SUCCESS(HttpStatus.OK, "알림 리스트 조회에 성공했습니다."),

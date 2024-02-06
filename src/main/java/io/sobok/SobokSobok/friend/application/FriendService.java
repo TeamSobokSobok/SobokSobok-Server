@@ -10,6 +10,7 @@ import io.sobok.SobokSobok.exception.model.ForbiddenException;
 import io.sobok.SobokSobok.exception.model.NotFoundException;
 import io.sobok.SobokSobok.friend.domain.Friend;
 import io.sobok.SobokSobok.friend.domain.SendFriend;
+import io.sobok.SobokSobok.friend.infrastructure.FriendQueryRepository;
 import io.sobok.SobokSobok.friend.infrastructure.FriendRepository;
 import io.sobok.SobokSobok.friend.infrastructure.SendFriendRepository;
 import io.sobok.SobokSobok.friend.ui.dto.AddFriendRequest;
@@ -40,6 +41,7 @@ public class FriendService {
     private final SendFriendRepository sendFriendRepository;
     private final FriendRepository friendRepository;
     private final NoticeQueryRepository noticeQueryRepository;
+    private final FriendQueryRepository friendQueryRepository;
 
     @Transactional
     public AddFriendResponse addFriend(Long userId, AddFriendRequest request) {
@@ -164,5 +166,20 @@ public class FriendService {
             .memberId(friend.getReceiverId())
             .friendName(request.friendName())
             .build();
+    }
+
+    @Transactional
+    public Boolean checkFriendRequest(Long userId, Long friendId) {
+
+        boolean AlreadyFriendRequest = false;
+
+        UserServiceUtil.existsUserById(userRepository, userId);
+        UserServiceUtil.existsUserById(userRepository, friendId);
+
+        if (friendQueryRepository.isAlreadyFriend(userId, friendId) || noticeRepository.existsBySenderIdAndReceiverIdAndIsOkay(userId, friendId, NoticeStatus.WAITING)) {
+            AlreadyFriendRequest = true;
+        }
+
+        return AlreadyFriendRequest;
     }
 }

@@ -31,6 +31,15 @@ jobs:
           # application.yml 파일 생성
           touch ./application.yml
           
+          # firebase 폴더 생성
+          mkdir firebase
+          
+          # firebase admin-sdk 파일 생성
+          touch ./firebase/sobok-76d0a-firebase-adminsdk-qb2ez-50cf49a817.json
+          
+          # Github-Actions 에서 설정한 값을 json 파일에 입력
+          echo "${{ secrets.SOBOKSOBOK_FIREBASE }}" >> ./firebase/sobok-76d0a-firebase-adminsdk-qb2ez-50cf49a817.json
+          
           # GitHub-Actions 에서 설정한 값을 application.yml 파일에 쓰기
           echo "${{ secrets.SOBOKSOBOK_DEPLOY }}" >> ./application.yml
 

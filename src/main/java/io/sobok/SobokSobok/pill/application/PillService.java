@@ -15,17 +15,20 @@ import io.sobok.SobokSobok.notice.infrastructure.NoticeRepository;
 import io.sobok.SobokSobok.pill.domain.Pill;
 import io.sobok.SobokSobok.pill.domain.PillSchedule;
 import io.sobok.SobokSobok.pill.domain.SendPill;
-import io.sobok.SobokSobok.pill.infrastructure.PillQueryRepository;
-import io.sobok.SobokSobok.pill.infrastructure.PillRepository;
-import io.sobok.SobokSobok.pill.infrastructure.PillScheduleRepository;
-import io.sobok.SobokSobok.pill.infrastructure.SendPillRepository;
+import io.sobok.SobokSobok.pill.infrastructure.*;
+import io.sobok.SobokSobok.pill.ui.dto.PillListResponse;
 import io.sobok.SobokSobok.pill.ui.dto.PillRequest;
+import io.sobok.SobokSobok.pill.ui.dto.PillResponse;
 import io.sobok.SobokSobok.utils.PillUtil;
 import lombok.RequiredArgsConstructor;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,6 +42,7 @@ public class PillService {
 
     private final FriendQueryRepository friendQueryRepository;
     private final PillQueryRepository pillQueryRepository;
+    private final PillScheduleQueryRepository pillScheduleQueryRepository;
 
     @Transactional
     public void addPill(Long userId, PillRequest request) {
@@ -138,6 +142,42 @@ public class PillService {
 
         pillRepository.delete(pill);
         pillScheduleRepository.deleteAllByPillId(pillId);
+    }
+
+    @Transactional
+    public List<PillListResponse> getPillList(Long userId) {
+
+        UserServiceUtil.existsUserById(userRepository, userId);
+
+        List<Pill> pillList = pillRepository.findAllByUserId(userId);
+        return pillList.stream()
+                .map(pill -> PillListResponse.builder()
+                        .id(pill.getId())
+                        .color(pill.getColor())
+                        .pillName(pill.getPillName())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public PillResponse getPillInfo(Long userId, Long pillId) {
+
+        UserServiceUtil.existsUserById(userRepository, userId);
+        Pill pill = PillServiceUtil.findPillById(pillRepository, pillId);
+
+        if (!pill.isPillUser(userId)) {
+            throw new ForbiddenException(ErrorCode.UNAUTHORIZED_PILL);
+        }
+
+        List<String> scheduleTime = pillScheduleQueryRepository.getPillScheduleTime(pill.getId());
+
+        return PillResponse.builder()
+                .pillName(pill.getPillName())
+                .scheduleDay(pill.getScheduleDay())
+                .startDate(pill.getStartDate())
+                .endDate(pill.getEndDate())
+                .scheduleTime(scheduleTime)
+                .build();
     }
 
     private void validatePillCount(Long userId, int requestPillCount) {
