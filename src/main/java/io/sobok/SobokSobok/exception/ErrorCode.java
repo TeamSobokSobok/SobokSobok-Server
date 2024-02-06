@@ -54,6 +54,7 @@ public enum ErrorCode {
     //sticker
     UNREGISTERED_STICKER(HttpStatus.NOT_FOUND, "등록되지 않은 스티커입니다."),
     ALREADY_SEND_STICKER(HttpStatus.CONFLICT, "이미 스티커를 전송했습니다."),
+    UNREGISTERED_LIKE_SCHEDULE(HttpStatus.NOT_FOUND, "스티커 전송기록이 존재하지 않습니다."),
     ;
 
     private final HttpStatus code;

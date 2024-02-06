@@ -6,6 +6,7 @@ import io.sobok.SobokSobok.exception.ErrorCode;
 import io.sobok.SobokSobok.exception.model.BadRequestException;
 import io.sobok.SobokSobok.exception.model.ConflictException;
 import io.sobok.SobokSobok.exception.model.ForbiddenException;
+import io.sobok.SobokSobok.exception.model.NotFoundException;
 import io.sobok.SobokSobok.friend.infrastructure.FriendQueryRepository;
 import io.sobok.SobokSobok.pill.application.PillScheduleServiceUtil;
 import io.sobok.SobokSobok.pill.application.PillServiceUtil;
@@ -16,7 +17,7 @@ import io.sobok.SobokSobok.pill.infrastructure.PillScheduleRepository;
 import io.sobok.SobokSobok.sticker.domain.LikeSchedule;
 import io.sobok.SobokSobok.sticker.infrastructure.LikeScheduleRepository;
 import io.sobok.SobokSobok.sticker.infrastructure.StickerRepository;
-import io.sobok.SobokSobok.sticker.ui.dto.SendStickerResponse;
+import io.sobok.SobokSobok.sticker.ui.dto.StickerActionResponse;
 import io.sobok.SobokSobok.sticker.ui.dto.StickerResponse;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -45,7 +46,8 @@ public class StickerService {
         ).collect(Collectors.toList());
     }
 
-    public SendStickerResponse sendSticker(Long userId, Long scheduleId, Long stickerId) {
+    @Transactional
+    public StickerActionResponse sendSticker(Long userId, Long scheduleId, Long stickerId) {
         UserServiceUtil.existsUserById(userRepository, userId);
         PillSchedule pillSchedule = PillScheduleServiceUtil.findPillScheduleById(
             pillScheduleRepository, scheduleId);
@@ -73,8 +75,31 @@ public class StickerService {
                 .build()
         );
 
-        return SendStickerResponse.builder()
-            .id(likeSchedule.getId())
+        return StickerActionResponse.builder()
+            .likeScheduleId(likeSchedule.getId())
+            .scheduleId(likeSchedule.getScheduleId())
+            .senderId(likeSchedule.getSenderId())
+            .stickerId(likeSchedule.getStickerId())
+            .createdAt(likeSchedule.getCreatedAt())
+            .updatedAt(likeSchedule.getUpdatedAt())
+            .build();
+    }
+
+    @Transactional
+    public StickerActionResponse updateSendSticker(Long userId, Long likeScheduleId, Long stickerId) {
+        UserServiceUtil.existsUserById(userRepository, userId);
+        LikeSchedule likeSchedule = likeScheduleRepository.findById(likeScheduleId)
+            .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_LIKE_SCHEDULE));
+        StickerServiceUtil.existsStickerById(stickerRepository, stickerId);
+
+        if(!likeSchedule.isLikeScheduleSender(userId)) {
+            throw new ForbiddenException(ErrorCode.FORBIDDEN_EXCEPTION);
+        }
+
+        likeSchedule.changeSticker(stickerId);
+
+        return StickerActionResponse.builder()
+            .likeScheduleId(likeSchedule.getId())
             .scheduleId(likeSchedule.getScheduleId())
             .senderId(likeSchedule.getSenderId())
             .stickerId(likeSchedule.getStickerId())
