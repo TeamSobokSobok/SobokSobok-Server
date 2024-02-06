@@ -44,6 +44,7 @@ public enum SuccessCode {
 
     //sticker
     GET_STICKER_LIST_SUCCESS(HttpStatus.OK, "스티커 전체 조회에 성공했습니다."),
+    SEND_STICKER_SUCCESS(HttpStatus.OK, "스티커 전송에 성공했습니다."),
     ;
 
     private final HttpStatus code;
