@@ -34,6 +34,7 @@ public enum ErrorCode {
     UNAUTHORIZED_PILL(HttpStatus.FORBIDDEN, "접근 권한이 없는 약입니다."),
     NOT_SEND_PILL(HttpStatus.NOT_FOUND, "전송된 적이 없는 약입니다."),
     UNREGISTERED_PILL_SCHEDULE(HttpStatus.NOT_FOUND, "등록되지 않은 약 일정입니다."),
+    UNCONSUMED_PILL(HttpStatus.BAD_REQUEST, "복용하지 않은 약입니다."),
 
 
     // friend
@@ -49,6 +50,10 @@ public enum ErrorCode {
 
     // external
     INVALID_EXTERNAL_REQUEST_DATA(HttpStatus.BAD_REQUEST, "외부 API 요청에 잘못된 데이터가 전달됐습니다."),
+
+    //sticker
+    UNREGISTERED_STICKER(HttpStatus.NOT_FOUND, "등록되지 않은 스티커입니다."),
+    ALREADY_SEND_STICKER(HttpStatus.CONFLICT, "이미 스티커를 전송했습니다."),
     ;
 
     private final HttpStatus code;
