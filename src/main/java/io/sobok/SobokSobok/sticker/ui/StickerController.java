@@ -4,6 +4,7 @@ import io.sobok.SobokSobok.auth.domain.User;
 import io.sobok.SobokSobok.common.dto.ApiResponse;
 import io.sobok.SobokSobok.exception.SuccessCode;
 import io.sobok.SobokSobok.sticker.application.StickerService;
+import io.sobok.SobokSobok.sticker.ui.dto.ReceivedStickerResponse;
 import io.sobok.SobokSobok.sticker.ui.dto.StickerActionResponse;
 import io.sobok.SobokSobok.sticker.ui.dto.StickerResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -76,6 +77,23 @@ public class StickerController {
             .body(ApiResponse.success(
                 SuccessCode.UPDATE_STICKER_SUCCESS,
                 stickerService.updateSendSticker(user.getId(), likeScheduleId, stickerId)
+            ));
+    }
+
+    @GetMapping("/{scheduleId}")
+    @Operation(
+        summary = "받은 스티커 전체 조회 API 메서드",
+        description = "받은 스티커를 전체 조회하는 메서드입니다."
+    )
+    public ResponseEntity<ApiResponse<List<ReceivedStickerResponse>>> getReceivedStickerList(
+        @AuthenticationPrincipal User user,
+        @PathVariable Long scheduleId
+    ) {
+        return ResponseEntity
+            .status(HttpStatus.OK)
+            .body(ApiResponse.success(
+                SuccessCode.GET_STICKER_LIST_SUCCESS,
+                stickerService.getReceivedStickerList(user.getId(), scheduleId)
             ));
     }
 }

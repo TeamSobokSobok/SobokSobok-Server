@@ -15,8 +15,10 @@ import io.sobok.SobokSobok.pill.domain.PillSchedule;
 import io.sobok.SobokSobok.pill.infrastructure.PillRepository;
 import io.sobok.SobokSobok.pill.infrastructure.PillScheduleRepository;
 import io.sobok.SobokSobok.sticker.domain.LikeSchedule;
+import io.sobok.SobokSobok.sticker.infrastructure.LikeScheduleQueryRepository;
 import io.sobok.SobokSobok.sticker.infrastructure.LikeScheduleRepository;
 import io.sobok.SobokSobok.sticker.infrastructure.StickerRepository;
+import io.sobok.SobokSobok.sticker.ui.dto.ReceivedStickerResponse;
 import io.sobok.SobokSobok.sticker.ui.dto.StickerActionResponse;
 import io.sobok.SobokSobok.sticker.ui.dto.StickerResponse;
 import java.util.List;
@@ -35,6 +37,7 @@ public class StickerService {
     private final PillRepository pillRepository;
     private final FriendQueryRepository friendQueryRepository;
     private final LikeScheduleRepository likeScheduleRepository;
+    private final LikeScheduleQueryRepository likeScheduleQueryRepository;
 
     @Transactional
     public List<StickerResponse> getStickerList() {
@@ -86,13 +89,14 @@ public class StickerService {
     }
 
     @Transactional
-    public StickerActionResponse updateSendSticker(Long userId, Long likeScheduleId, Long stickerId) {
+    public StickerActionResponse updateSendSticker(Long userId, Long likeScheduleId,
+        Long stickerId) {
         UserServiceUtil.existsUserById(userRepository, userId);
         LikeSchedule likeSchedule = likeScheduleRepository.findById(likeScheduleId)
             .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_LIKE_SCHEDULE));
         StickerServiceUtil.existsStickerById(stickerRepository, stickerId);
 
-        if(!likeSchedule.isLikeScheduleSender(userId)) {
+        if (!likeSchedule.isLikeScheduleSender(userId)) {
             throw new ForbiddenException(ErrorCode.FORBIDDEN_EXCEPTION);
         }
 
@@ -106,5 +110,19 @@ public class StickerService {
             .createdAt(likeSchedule.getCreatedAt())
             .updatedAt(likeSchedule.getUpdatedAt())
             .build();
+    }
+
+    @Transactional
+    public List<ReceivedStickerResponse> getReceivedStickerList(Long userId, Long scheduleId) {
+        UserServiceUtil.existsUserById(userRepository, userId);
+        PillSchedule pillSchedule = PillScheduleServiceUtil.findPillScheduleById(
+            pillScheduleRepository, scheduleId);
+        Pill pill = PillServiceUtil.findPillById(pillRepository, pillSchedule.getPillId());
+
+        if (!pill.isPillUser(userId) && !friendQueryRepository.isAlreadyFriend(userId, pill.getUserId())) {
+            throw new ForbiddenException(ErrorCode.FORBIDDEN_EXCEPTION);
+        }
+
+        return likeScheduleQueryRepository.getReceivedStickerList(scheduleId, userId);
     }
 }
