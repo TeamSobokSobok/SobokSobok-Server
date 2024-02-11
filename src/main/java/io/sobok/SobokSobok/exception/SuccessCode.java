@@ -27,8 +27,11 @@ public enum SuccessCode {
     GET_PILL_INFO_SUCCESS(HttpStatus.OK, "약 정보 조회에 성공했습니다."),
     SEND_PILL_SUCCESS(HttpStatus.CREATED, "약 전송에 성공했습니다."),
     DELETE_PILL_SUCCESS(HttpStatus.OK, "약 삭제에 성공했습니다."),
+
+    // schedule
     CHECK_PILL_SCHEDULE_SUCCESS(HttpStatus.OK, "복용 완료 체크에 성공했습니다."),
     UNCHECK_PILL_SCHEDULE_SUCCESS(HttpStatus.OK, "복용 체크 취소에 성공했습니다."),
+    GET_MONTH_SCHEDULE_SUCCESS(HttpStatus.OK, "월 스케줄 조회에 성공했습니다"),
 
     // friend
     ADD_FRIEND_SUCCESS(HttpStatus.OK, "공유 요청에 성공했습니다."),

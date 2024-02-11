@@ -5,16 +5,17 @@ import io.sobok.SobokSobok.common.dto.ApiResponse;
 import io.sobok.SobokSobok.exception.SuccessCode;
 import io.sobok.SobokSobok.pill.application.PillScheduleService;
 import io.sobok.SobokSobok.pill.ui.dto.CheckPillScheduleResponse;
+import io.sobok.SobokSobok.pill.ui.dto.MonthScheduleResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +24,23 @@ import org.springframework.web.bind.annotation.RestController;
 public class PillScheduleController {
 
     private final PillScheduleService pillScheduleService;
+
+    @GetMapping("/calendar")
+    @Operation(
+            summary = "내 복약 일정 조회 API 메서드",
+            description = "query string -> date (조회할 달의 아무 날짜)"
+    )
+    public ResponseEntity<ApiResponse<List<MonthScheduleResponse>>> getMonthSchedule(
+            @AuthenticationPrincipal User user,
+            @RequestParam LocalDate date
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        SuccessCode.GET_MONTH_SCHEDULE_SUCCESS,
+                        pillScheduleService.getMonthSchedule(user.getId(), date)
+                ));
+    }
 
     @PutMapping("/check/{scheduleId}")
     @Operation(
