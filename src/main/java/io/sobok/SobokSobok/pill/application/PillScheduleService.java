@@ -10,6 +10,7 @@ import io.sobok.SobokSobok.pill.infrastructure.PillRepository;
 import io.sobok.SobokSobok.pill.infrastructure.PillScheduleQueryRepository;
 import io.sobok.SobokSobok.pill.infrastructure.PillScheduleRepository;
 import io.sobok.SobokSobok.pill.ui.dto.CheckPillScheduleResponse;
+import io.sobok.SobokSobok.pill.ui.dto.DateScheduleResponse;
 import io.sobok.SobokSobok.pill.ui.dto.MonthScheduleResponse;
 import io.sobok.SobokSobok.utils.DateUtil;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +37,13 @@ public class PillScheduleService {
         LocalDate endDateOfMonth = DateUtil.getEndDateOfMonth(date);
 
         return pillScheduleQueryRepository.getMonthSchedule(userId, startDateOfMonth, endDateOfMonth);
+    }
+
+    @Transactional
+    public List<DateScheduleResponse> getDateSchedule(Long userId, LocalDate date) {
+        UserServiceUtil.existsUserById(userRepository, userId);
+
+        return pillScheduleQueryRepository.getDateSchedule(userId, date);
     }
 
     @Transactional
