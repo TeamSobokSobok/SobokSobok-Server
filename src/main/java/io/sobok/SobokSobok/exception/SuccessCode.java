@@ -34,6 +34,7 @@ public enum SuccessCode {
     GET_MONTH_SCHEDULE_SUCCESS(HttpStatus.OK, "월 스케줄 조회에 성공했습니다"),
     GET_DATE_SCHEDULE_SUCCESS(HttpStatus.OK, "일 스케줄 조회에 성공했습니다."),
     GET_FRIEND_MONTH_SCHEDULE_SUCCESS(HttpStatus.OK, "친구 월 스케줄 조회에 성공했습니다."),
+    GET_FRIEND_DATE_SCHEDULE_SUCCESS(HttpStatus.OK, "친구 일 스케줄 조회에 성공했습니다."),
 
     // friend
     ADD_FRIEND_SUCCESS(HttpStatus.OK, "공유 요청에 성공했습니다."),
