@@ -64,6 +64,18 @@ public class PillScheduleService {
     }
 
     @Transactional
+    public List<DateScheduleResponse> getFriendDateSchedule(Long userId, Long friendId, LocalDate date) {
+        UserServiceUtil.existsUserById(userRepository, userId);
+        UserServiceUtil.existsUserById(userRepository, friendId);
+
+        if (!friendQueryRepository.isAlreadyFriend(userId, friendId)) {
+            throw new ForbiddenException(ErrorCode.NOT_FRIEND);
+        }
+
+        return pillScheduleQueryRepository.getDateSchedule(friendId, date);
+    }
+
+    @Transactional
     public CheckPillScheduleResponse changePillScheduleCheck(Long userId, Long scheduleId, Boolean isCheck) {
         UserServiceUtil.existsUserById(userRepository, userId);
 

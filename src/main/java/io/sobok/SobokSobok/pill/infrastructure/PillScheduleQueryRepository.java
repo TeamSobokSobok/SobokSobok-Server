@@ -93,7 +93,7 @@ public class PillScheduleQueryRepository {
                 .distinct()
                 .from(pillSchedule)
                 .leftJoin(pill).on(pill.id.eq(pillSchedule.pillId))
-                .where(pill.userId.eq(userId), pillSchedule.scheduleDate.eq(date))
+                .where(pill.userId.eq(userId), pill.isStop.eq(false), pillSchedule.scheduleDate.eq(date))
                 .fetch();
 
         List<DateScheduleResponse> dateScheduleResponses = new ArrayList<>();
