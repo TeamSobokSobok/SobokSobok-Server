@@ -5,6 +5,7 @@ import io.sobok.SobokSobok.common.dto.ApiResponse;
 import io.sobok.SobokSobok.exception.SuccessCode;
 import io.sobok.SobokSobok.pill.application.PillScheduleService;
 import io.sobok.SobokSobok.pill.ui.dto.CheckPillScheduleResponse;
+import io.sobok.SobokSobok.pill.ui.dto.DateScheduleResponse;
 import io.sobok.SobokSobok.pill.ui.dto.MonthScheduleResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,6 +40,23 @@ public class PillScheduleController {
                 .body(ApiResponse.success(
                         SuccessCode.GET_MONTH_SCHEDULE_SUCCESS,
                         pillScheduleService.getMonthSchedule(user.getId(), date)
+                ));
+    }
+
+    @GetMapping("/detail")
+    @Operation(
+            summary = "특정 일자 복약 일정 조회 API",
+            description = "query string -> date (조회할 날짜)"
+    )
+    public ResponseEntity<ApiResponse<List<DateScheduleResponse>>> getDateSchedule(
+            @AuthenticationPrincipal User user,
+            @RequestParam LocalDate date
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        SuccessCode.GET_DATE_SCHEDULE_SUCCESS,
+                        pillScheduleService.getDateSchedule(user.getId(),date)
                 ));
     }
 

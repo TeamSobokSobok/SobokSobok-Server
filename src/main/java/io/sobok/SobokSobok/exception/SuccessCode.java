@@ -32,6 +32,7 @@ public enum SuccessCode {
     CHECK_PILL_SCHEDULE_SUCCESS(HttpStatus.OK, "복용 완료 체크에 성공했습니다."),
     UNCHECK_PILL_SCHEDULE_SUCCESS(HttpStatus.OK, "복용 체크 취소에 성공했습니다."),
     GET_MONTH_SCHEDULE_SUCCESS(HttpStatus.OK, "월 스케줄 조회에 성공했습니다"),
+    GET_DATE_SCHEDULE_SUCCESS(HttpStatus.OK, "일 스케줄 조회에 성공했습니다."),
 
     // friend
     ADD_FRIEND_SUCCESS(HttpStatus.OK, "공유 요청에 성공했습니다."),
