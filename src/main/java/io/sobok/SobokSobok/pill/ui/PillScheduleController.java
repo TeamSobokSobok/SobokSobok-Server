@@ -60,6 +60,24 @@ public class PillScheduleController {
                 ));
     }
 
+    @GetMapping("/{memberId}/calendar")
+    @Operation(
+            summary = "친구 복약 일정 조회 API 메서드",
+            description = "path variable -> 친구의 userId, query string -> date (조회할 달의 아무 날짜)"
+    )
+    public ResponseEntity<ApiResponse<List<MonthScheduleResponse>>> getFriendMonthSchedule(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long memberId,
+            @RequestParam LocalDate date
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        SuccessCode.GET_FRIEND_MONTH_SCHEDULE_SUCCESS,
+                        pillScheduleService.getFriendMonthSchedule(user.getId(), memberId, date)
+                ));
+    }
+
     @PutMapping("/check/{scheduleId}")
     @Operation(
         summary = "복용 체크 완료 API 메서드",

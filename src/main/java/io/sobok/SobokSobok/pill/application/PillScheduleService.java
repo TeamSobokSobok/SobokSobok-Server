@@ -4,6 +4,7 @@ import io.sobok.SobokSobok.auth.application.util.UserServiceUtil;
 import io.sobok.SobokSobok.auth.infrastructure.UserRepository;
 import io.sobok.SobokSobok.exception.ErrorCode;
 import io.sobok.SobokSobok.exception.model.ForbiddenException;
+import io.sobok.SobokSobok.friend.infrastructure.FriendQueryRepository;
 import io.sobok.SobokSobok.pill.domain.Pill;
 import io.sobok.SobokSobok.pill.domain.PillSchedule;
 import io.sobok.SobokSobok.pill.infrastructure.PillRepository;
@@ -28,6 +29,7 @@ public class PillScheduleService {
     private final PillRepository pillRepository;
     private final PillScheduleRepository pillScheduleRepository;
     private final PillScheduleQueryRepository pillScheduleQueryRepository;
+    private final FriendQueryRepository friendQueryRepository;
 
     @Transactional
     public List<MonthScheduleResponse> getMonthSchedule(Long userId, LocalDate date) {
@@ -44,6 +46,21 @@ public class PillScheduleService {
         UserServiceUtil.existsUserById(userRepository, userId);
 
         return pillScheduleQueryRepository.getDateSchedule(userId, date);
+    }
+
+    @Transactional
+    public List<MonthScheduleResponse> getFriendMonthSchedule(Long userId, Long friendId, LocalDate date) {
+        UserServiceUtil.existsUserById(userRepository, userId);
+        UserServiceUtil.existsUserById(userRepository, friendId);
+
+        if (!friendQueryRepository.isAlreadyFriend(userId, friendId)) {
+            throw new ForbiddenException(ErrorCode.NOT_FRIEND);
+        }
+
+        LocalDate startDateOfMonth = DateUtil.getStartDateOfMonth(date);
+        LocalDate endDateOfMonth = DateUtil.getEndDateOfMonth(date);
+
+        return pillScheduleQueryRepository.getMonthSchedule(friendId, startDateOfMonth, endDateOfMonth);
     }
 
     @Transactional
