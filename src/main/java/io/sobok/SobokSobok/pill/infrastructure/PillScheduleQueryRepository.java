@@ -56,6 +56,7 @@ public class PillScheduleQueryRepository {
                 .leftJoin(pill).on(pill.id.eq(pillSchedule.pillId))
                 .where(
                         pill.userId.eq(userId),
+                        pill.isStop.eq(false),
                         pillSchedule.scheduleDate.goe(startDate),
                         pillSchedule.scheduleDate.loe(endDate)
                 )
