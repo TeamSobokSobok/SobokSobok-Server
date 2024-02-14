@@ -10,6 +10,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Getter
 @Entity
@@ -52,5 +53,13 @@ public class Pill extends BaseEntity {
         this.endDate = endDate;
         this.scheduleDay = scheduleDay;
         this.userId = userId;
+    }
+
+    public void receivePill(Long userId) {
+        this.userId = userId;
+    }
+
+    public boolean isPillUser(Long userId) {
+        return Objects.equals(this.userId, userId);
     }
 }

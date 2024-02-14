@@ -1,5 +1,6 @@
-package io.sobok.SobokSobok.security.jwt;
+package io.sobok.SobokSobok.security.filter;
 
+import io.sobok.SobokSobok.security.jwt.JwtProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
