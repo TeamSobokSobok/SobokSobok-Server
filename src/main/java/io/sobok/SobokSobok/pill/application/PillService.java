@@ -21,12 +21,13 @@ import io.sobok.SobokSobok.pill.ui.dto.PillRequest;
 import io.sobok.SobokSobok.pill.ui.dto.PillResponse;
 import io.sobok.SobokSobok.utils.PillUtil;
 import lombok.RequiredArgsConstructor;
-import org.checkerframework.checker.units.qual.A;
+import io.sobok.SobokSobok.pill.infrastructure.PillQueryRepository;
+import io.sobok.SobokSobok.pill.infrastructure.PillRepository;
+import io.sobok.SobokSobok.pill.infrastructure.PillScheduleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
