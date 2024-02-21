@@ -38,7 +38,6 @@ public class UserService {
             member -> result.add(UsernameResponse.builder()
                 .memberId(member.getId())
                 .memberName(member.getUsername())
-                .deviceOS(member.getSocialInfo().getSocialType())
                 .selfCheck(member.getId().equals(userId))
                 .build())
         );
