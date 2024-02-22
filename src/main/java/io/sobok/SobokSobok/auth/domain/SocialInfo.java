@@ -15,24 +15,14 @@ import lombok.NoArgsConstructor;
 public class SocialInfo {
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private SocialType socialType;
-
-    @Column(nullable = false)
     private String socialId;
-
-    @Column
-    private String socialProfileImage;
 
     public void removeSocialInfo() {
         this.socialId = "";
-        this.socialProfileImage = "";
     }
 
     @Builder
-    public SocialInfo(SocialType socialType, String socialId, String socialProfileImage) {
-        this.socialType = socialType;
+    public SocialInfo(String socialId) {
         this.socialId = socialId;
-        this.socialProfileImage = socialProfileImage;
     }
 }

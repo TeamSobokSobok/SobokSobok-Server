@@ -2,8 +2,6 @@ package io.sobok.SobokSobok.auth.ui;
 
 import io.sobok.SobokSobok.auth.application.AuthService;
 import io.sobok.SobokSobok.auth.application.SocialService;
-import io.sobok.SobokSobok.auth.application.SocialServiceProvider;
-import io.sobok.SobokSobok.auth.domain.SocialType;
 import io.sobok.SobokSobok.auth.domain.User;
 import io.sobok.SobokSobok.auth.ui.dto.*;
 import io.sobok.SobokSobok.common.dto.ApiResponse;
@@ -24,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
-    private final SocialServiceProvider socialServiceProvider;
+    private final SocialService socialService;
 
     @PostMapping("/signup")
     @Operation(
@@ -33,7 +31,6 @@ public class AuthController {
     )
     public ResponseEntity<ApiResponse<SocialSignupResponse>> signup(@RequestBody @Valid final SocialSignupRequest request) {
 
-        SocialService socialService = socialServiceProvider.getSocialService(request.socialType());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(
@@ -48,19 +45,16 @@ public class AuthController {
             description = "사용자의 소셜 정보로 소복소복에 로그인하는 API 입니다."
     )
     public ResponseEntity<ApiResponse<SocialLoginResponse>> login(
-            @RequestParam final String code,
-            @RequestParam final SocialType socialType,
+            @RequestParam final String socialId,
             @RequestParam final String deviceToken
     ) {
 
-        SocialService socialService = socialServiceProvider.getSocialService(socialType);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(
                         SuccessCode.SOCIAL_LOGIN_SUCCESS,
                         socialService.login(SocialLoginRequest.builder()
-                                .code(code)
-                                .socialType(socialType)
+                                .socialId(socialId)
                                 .deviceToken(deviceToken)
                                 .build())
                 ));

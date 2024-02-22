@@ -1,5 +1,6 @@
 package io.sobok.SobokSobok.auth.application;
 
+import io.sobok.SobokSobok.auth.application.util.UserServiceUtil;
 import io.sobok.SobokSobok.auth.domain.User;
 import io.sobok.SobokSobok.auth.infrastructure.UserRepository;
 import io.sobok.SobokSobok.auth.ui.dto.JwtTokenResponse;
@@ -26,8 +27,7 @@ public class AuthService {
     @Transactional
     public void logout(Long userId) {
 
-        User user = userRepository.findById(userId)
-                        .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_USER));
+        User user = UserServiceUtil.findUserById(userRepository, userId);
 
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
         if (valueOperations.get(user.getSocialInfo().getSocialId()) == null) {
