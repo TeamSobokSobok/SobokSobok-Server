@@ -2,7 +2,6 @@ package io.sobok.SobokSobok.auth.application;
 
 import io.sobok.SobokSobok.auth.domain.Role;
 import io.sobok.SobokSobok.auth.domain.SocialInfo;
-import io.sobok.SobokSobok.auth.domain.SocialType;
 import io.sobok.SobokSobok.auth.domain.User;
 import io.sobok.SobokSobok.auth.infrastructure.UserRepository;
 import io.sobok.SobokSobok.auth.ui.dto.SocialLoginRequest;
@@ -12,7 +11,6 @@ import io.sobok.SobokSobok.auth.ui.dto.SocialSignupResponse;
 import io.sobok.SobokSobok.exception.ErrorCode;
 import io.sobok.SobokSobok.exception.model.ConflictException;
 import io.sobok.SobokSobok.exception.model.NotFoundException;
-import io.sobok.SobokSobok.external.kakao.KakaoService;
 import io.sobok.SobokSobok.security.jwt.Jwt;
 import io.sobok.SobokSobok.security.jwt.JwtProvider;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class SocialService {
-
-    private final KakaoService kakaoService;
 
     private final UserRepository userRepository;
 

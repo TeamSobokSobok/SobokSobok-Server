@@ -3,7 +3,8 @@ package io.sobok.SobokSobok.config;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,35 +14,39 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+@Slf4j
 @Configuration
 public class FCMConfig {
 
-    @Value("${firebase.admin-sdk}")
-    String adminSdkFileName;
+    @Value("${fcm.key.path}")
+    private String SERVICE_ACCOUNT_PATH;
 
     @Bean
-    FirebaseMessaging firebaseMessaging() throws IOException {
-        ClassPathResource resource = new ClassPathResource("firebase/" + adminSdkFileName);
+    FirebaseMessaging firebaseMessaging() {
+        FirebaseApp firebaseApp = getOrCreateFirebaseApp();
+        return FirebaseMessaging.getInstance(firebaseApp);
+    }
 
-        InputStream refreshToken = resource.getInputStream();
+    private FirebaseApp getOrCreateFirebaseApp() {
+        List<FirebaseApp> firebaseApps = FirebaseApp.getApps();
+        return firebaseApps.stream()
+                .filter(fApp -> FirebaseApp.DEFAULT_APP_NAME.equals(fApp.getName()))
+                .findFirst()
+                .orElseGet(this::initializeFirebaseApp);
+    }
 
-        FirebaseApp firebaseApp = null;
-        List<FirebaseApp> firebaseAppList = FirebaseApp.getApps();
 
-        if (firebaseAppList != null && !firebaseAppList.isEmpty()) {
-            for (FirebaseApp app : firebaseAppList) {
-                if (app.getName().equals(FirebaseApp.DEFAULT_APP_NAME)) {
-                    firebaseApp = app;
-                }
-            }
-        } else {
+    private FirebaseApp initializeFirebaseApp() {
+        try {
+            InputStream serviceAccount = new ClassPathResource(SERVICE_ACCOUNT_PATH).getInputStream();
             FirebaseOptions options = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(refreshToken))
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
 
-            firebaseApp = FirebaseApp.initializeApp(options);
+            return FirebaseApp.initializeApp(options);
+        } catch (IOException e) {
+            log.error("Firebase App 초기화에 실패했습니다.");
+            throw new IllegalArgumentException("Invalid firebase service account");
         }
-
-        return FirebaseMessaging.getInstance(firebaseApp);
     }
 }
