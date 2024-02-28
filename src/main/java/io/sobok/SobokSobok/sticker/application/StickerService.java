@@ -1,12 +1,15 @@
 package io.sobok.SobokSobok.sticker.application;
 
 import io.sobok.SobokSobok.auth.application.util.UserServiceUtil;
+import io.sobok.SobokSobok.auth.domain.User;
 import io.sobok.SobokSobok.auth.infrastructure.UserRepository;
 import io.sobok.SobokSobok.exception.ErrorCode;
 import io.sobok.SobokSobok.exception.model.BadRequestException;
 import io.sobok.SobokSobok.exception.model.ConflictException;
 import io.sobok.SobokSobok.exception.model.ForbiddenException;
 import io.sobok.SobokSobok.exception.model.NotFoundException;
+import io.sobok.SobokSobok.external.firebase.FCMPushService;
+import io.sobok.SobokSobok.external.firebase.dto.PushNotificationRequest;
 import io.sobok.SobokSobok.friend.infrastructure.FriendQueryRepository;
 import io.sobok.SobokSobok.pill.application.PillScheduleServiceUtil;
 import io.sobok.SobokSobok.pill.application.PillServiceUtil;
@@ -30,6 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class StickerService {
+
+    private final FCMPushService fcmPushService;
 
     private final StickerRepository stickerRepository;
     private final UserRepository userRepository;
@@ -61,8 +66,9 @@ public class StickerService {
         }
 
         Pill pill = PillServiceUtil.findPillById(pillRepository, pillSchedule.getPillId());
-        Long receiverId = pill.getUserId();
-        if (!friendQueryRepository.isAlreadyFriend(userId, receiverId)) {
+        User receiver = UserServiceUtil.findUserById(userRepository, pill.getUserId());
+        String senderUsername = friendQueryRepository.getFriendName(receiver.getId(), userId);
+        if (!friendQueryRepository.isAlreadyFriend(userId, receiver.getId())) {
             throw new ForbiddenException(ErrorCode.NOT_FRIEND);
         }
 
@@ -77,6 +83,12 @@ public class StickerService {
                 .stickerId(stickerId)
                 .build()
         );
+
+        fcmPushService.sendNotificationByToken(PushNotificationRequest.builder()
+                .userId(receiver.getId())
+                .title(senderUsername + "님이 " + pill.getPillName() + " 복약에 반응을 남겼어요!")
+                .body("받은 스티커를 확인해보세요")
+                .build());
 
         return StickerActionResponse.builder()
             .likeScheduleId(likeSchedule.getId())

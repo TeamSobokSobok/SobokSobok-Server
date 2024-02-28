@@ -7,7 +7,8 @@ import io.sobok.SobokSobok.exception.ErrorCode;
 import io.sobok.SobokSobok.exception.model.BadRequestException;
 import io.sobok.SobokSobok.exception.model.ConflictException;
 import io.sobok.SobokSobok.exception.model.ForbiddenException;
-import io.sobok.SobokSobok.exception.model.NotFoundException;
+import io.sobok.SobokSobok.external.firebase.FCMPushService;
+import io.sobok.SobokSobok.external.firebase.dto.PushNotificationRequest;
 import io.sobok.SobokSobok.friend.domain.Friend;
 import io.sobok.SobokSobok.friend.domain.SendFriend;
 import io.sobok.SobokSobok.friend.infrastructure.FriendQueryRepository;
@@ -35,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class FriendService {
+
+    private final FCMPushService fcmPushService;
 
     private final UserRepository userRepository;
     private final NoticeRepository noticeRepository;
@@ -80,6 +83,11 @@ public class FriendService {
             )
         );
 
+        fcmPushService.sendNotificationByToken(PushNotificationRequest.builder()
+                .userId(receiver.getId())
+                .title(sender.getUsername() + "님이 친구를 신청했어요")
+                .build());
+
         return AddFriendResponse.builder()
             .noticeId(notice.getId())
             .senderName(sender.getUsername())
@@ -115,14 +123,15 @@ public class FriendService {
         }
 
         User sender = UserServiceUtil.findUserById(userRepository, notice.getSenderId());
+        User receiver = UserServiceUtil.findUserById(userRepository, userId);
 
         if (friendRepository.countBySenderId(userId) >= 5 ||
             friendRepository.countBySenderId(sender.getId()) >= 5) {
-            notice.setIsOkay(NoticeStatus.REFUSE);
+            notice.updateIsOkay(NoticeStatus.REFUSE);
             throw new ConflictException(ErrorCode.EXCEEDED_FRIEND_COUNT);
         }
 
-        notice.setIsOkay(request.isOkay());
+        notice.updateIsOkay(request.isOkay());
 
         if (request.isOkay() == NoticeStatus.ACCEPT) {
             SendFriend sendFriend = sendFriendRepository.findByNoticeId(noticeId);
@@ -137,6 +146,16 @@ public class FriendService {
                 sender.getId(),
                 sender.getUsername()
             ));
+
+            fcmPushService.sendNotificationByToken(PushNotificationRequest.builder()
+                    .userId(sender.getId())
+                    .title(receiver.getUsername() + "님이 친구를 수락했어요")
+                    .build());
+        } else {
+            fcmPushService.sendNotificationByToken(PushNotificationRequest.builder()
+                    .userId(sender.getId())
+                    .title(receiver.getUsername() + "님이 친구를 거절했어요")
+                    .build());
         }
 
         return HandleFriendRequestResponse.builder()

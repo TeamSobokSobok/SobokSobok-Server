@@ -7,6 +7,8 @@ import io.sobok.SobokSobok.exception.ErrorCode;
 import io.sobok.SobokSobok.exception.model.BadRequestException;
 import io.sobok.SobokSobok.exception.model.ForbiddenException;
 import io.sobok.SobokSobok.exception.model.NotFoundException;
+import io.sobok.SobokSobok.external.firebase.FCMPushService;
+import io.sobok.SobokSobok.external.firebase.dto.PushNotificationRequest;
 import io.sobok.SobokSobok.notice.domain.Notice;
 import io.sobok.SobokSobok.notice.domain.NoticeStatus;
 import io.sobok.SobokSobok.notice.infrastructure.NoticeQueryRepository;
@@ -29,6 +31,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class NoticeService {
+
+    private final FCMPushService fcmPushService;
 
     private final UserRepository userRepository;
     private final PillRepository pillRepository;
@@ -83,6 +87,8 @@ public class NoticeService {
         Notice notice = noticeRepository.findById(sendPill.getNoticeId())
                 .orElseThrow(() -> new NotFoundException(ErrorCode.NON_EXISTS_NOTICE));
 
+        User sender = UserServiceUtil.findUserById(userRepository, notice.getSenderId());
+
         if (!notice.getReceiverId().equals(receiver.getId())) {
             throw new ForbiddenException(ErrorCode.UNAUTHORIZED_PILL);
         }
@@ -94,10 +100,20 @@ public class NoticeService {
         if (isOkay.equals(NoticeStatus.REFUSE)) {
             pillRepository.deleteById(pillId);
             pillScheduleRepository.deleteAllByPillId(pillId);
+
+            fcmPushService.sendNotificationByToken(PushNotificationRequest.builder()
+                    .userId(sender.getId())
+                    .title(receiver.getUsername() + "님이 약 일정을 거절했어요")
+                    .build());
         }
 
         if (isOkay.equals(NoticeStatus.ACCEPT)) {
             pill.receivePill(receiver.getId());
+
+            fcmPushService.sendNotificationByToken(PushNotificationRequest.builder()
+                    .userId(sender.getId())
+                    .title(receiver.getUsername() + "님이 약 일정을 수락했어요")
+                    .build());
         }
 
         notice.changeNoticeStatus(isOkay);

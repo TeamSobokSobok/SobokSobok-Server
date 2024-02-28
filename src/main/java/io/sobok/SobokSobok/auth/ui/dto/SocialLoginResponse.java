@@ -6,7 +6,7 @@ import lombok.Builder;
 public record SocialLoginResponse(
 
         String accessToken,
-
-        String refreshToken
+        String refreshToken,
+        Boolean isNew
 ) {
 }

@@ -29,7 +29,7 @@ public class Notice extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private NoticeStatus isOkay;
 
-    public void setIsOkay(NoticeStatus isOkay) {
+    public void updateIsOkay(NoticeStatus isOkay) {
         this.isOkay = isOkay;
     }
 

@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -21,6 +23,22 @@ public class ControllerExceptionAdvice {
     protected ResponseEntity<ApiResponse<Void>> handleHttpMessageNotReadableException(final HttpMessageNotReadableException exception) {
         return new ResponseEntity<>(
                 ApiResponse.error(ErrorCode.INVALID_REQUEST_BODY),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    protected ResponseEntity<ApiResponse<Void>> handleMissingServletRequestParameterException(final MissingServletRequestParameterException exception) {
+        return new ResponseEntity<>(
+                ApiResponse.error(ErrorCode.NOT_EXIST_PARAMETER),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    protected ResponseEntity<ApiResponse<Void>> handleHttpRequestMethodNotSupportedException(final HttpRequestMethodNotSupportedException exception) {
+        return new ResponseEntity<>(
+                ApiResponse.error(ErrorCode.NOT_SUPPORTED_METHOD),
                 HttpStatus.BAD_REQUEST
         );
     }
