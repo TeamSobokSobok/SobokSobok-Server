@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
 
     // common
+    NOT_EXIST_PARAMETER(HttpStatus.BAD_REQUEST, "필수 파라미터 값이 없습니다."),
+    NOT_SUPPORTED_METHOD(HttpStatus.BAD_REQUEST, "사용할 수 없는 HTTP method입니다."),
     INVALID_REQUEST_BODY(HttpStatus.BAD_REQUEST, "잘못된 Request body입니다."),
     BAD_REQUEST_EXCEPTION(HttpStatus.BAD_REQUEST, "잘못된 형식의 요청입니다."),
     FILE_SAVE_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "파일 생성에 실패했습니다."),

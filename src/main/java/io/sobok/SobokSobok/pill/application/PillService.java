@@ -7,6 +7,8 @@ import io.sobok.SobokSobok.exception.ErrorCode;
 import io.sobok.SobokSobok.exception.model.BadRequestException;
 import io.sobok.SobokSobok.exception.model.ForbiddenException;
 import io.sobok.SobokSobok.exception.model.NotFoundException;
+import io.sobok.SobokSobok.external.firebase.FCMPushService;
+import io.sobok.SobokSobok.external.firebase.dto.PushNotificationRequest;
 import io.sobok.SobokSobok.friend.infrastructure.FriendQueryRepository;
 import io.sobok.SobokSobok.notice.domain.Notice;
 import io.sobok.SobokSobok.notice.domain.NoticeStatus;
@@ -34,6 +36,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class PillService {
+
+    private final FCMPushService fcmPushService;
 
     private final UserRepository userRepository;
     private final PillRepository pillRepository;
@@ -82,7 +86,6 @@ public class PillService {
     public void sendPill(Long userId, Long friendId, PillRequest request) {
 
         UserServiceUtil.existsUserById(userRepository, userId);
-        UserServiceUtil.existsUserById(userRepository, friendId);
 
         if (!friendQueryRepository.isAlreadyFriend(userId, friendId)) {
             throw new ForbiddenException(ErrorCode.NOT_FRIEND);
@@ -92,8 +95,10 @@ public class PillService {
         validatePillRequest(request.startDate(), request.endDate(), request.day(), request.timeList());
 
         Notice newNotice = noticeRepository.save(Notice.newInstance(userId, friendId, NoticeType.PILL, NoticeStatus.WAITING));
+        StringBuilder pillNameSentence = new StringBuilder();
 
-        for (String pill : request.pillName()) {
+        for (int index = 0; index < request.pillName().length; index++) {
+            String pill = request.pillName()[index];
             Pill newPill = pillRepository.save(Pill.builder()
                     .pillName(pill)
                     .color(PillUtil.getRandomColorNumber())
@@ -117,7 +122,22 @@ public class PillService {
             }
 
             sendPillRepository.save(SendPill.newInstance(newNotice.getId(), newPill.getId()));
+
+            if (index == (request.pillName().length - 1)) {
+                pillNameSentence.append(pill);
+                break;
+            }
+
+            pillNameSentence.append(pill).append(" / ");
         }
+
+        String receiverUsername = friendQueryRepository.getFriendName(userId, friendId);
+
+        fcmPushService.sendNotificationByToken(PushNotificationRequest.builder()
+                .userId(friendId)
+                .title(receiverUsername + "님이 보낸 약 일정을 확인해보세요!")
+                .body(pillNameSentence.toString())
+                .build());
     }
 
 

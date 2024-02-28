@@ -21,4 +21,17 @@ public class FriendQueryRepository {
                         friend.receiverId.eq(receiverId)
                 ).fetchFirst() != null;
     }
+
+    public String getFriendName(Long senderId, Long receiverId) {
+        QFriend friend = QFriend.friend;
+
+        return queryFactory
+                .select(friend.friendName)
+                .from(friend)
+                .where(
+                        friend.senderId.eq(senderId),
+                        friend.receiverId.eq(receiverId)
+                )
+                .fetchFirst();
+    }
 }

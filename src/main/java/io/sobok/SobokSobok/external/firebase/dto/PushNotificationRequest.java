@@ -5,7 +5,8 @@ import lombok.Builder;
 import java.util.Map;
 
 @Builder
-public record FCMNotificationRequest(
+public record PushNotificationRequest(
+
 
         Long userId,
         String title,
