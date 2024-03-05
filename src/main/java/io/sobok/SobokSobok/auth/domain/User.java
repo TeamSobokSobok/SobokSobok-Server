@@ -27,13 +27,13 @@ public class User extends BaseEntity implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column
     private String username;
 
     @Embedded
     private SocialInfo socialInfo;
 
-    @Column(nullable = false, unique = true)
+    @Column
     private String deviceToken;
 
     @Column(nullable = false)
@@ -66,8 +66,8 @@ public class User extends BaseEntity implements UserDetails {
     }
 
     public void deleteUser(String leaveReason) {
-        this.deviceToken = "";
-        this.username = "";
+        this.deviceToken = null;
+        this.username = null;
         this.isDeleted = true;
         this.leaveReason = leaveReason;
         this.deletedAt = LocalDateTime.now();
