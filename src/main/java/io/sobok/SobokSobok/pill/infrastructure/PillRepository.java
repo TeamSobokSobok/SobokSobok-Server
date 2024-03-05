@@ -9,4 +9,7 @@ public interface PillRepository extends JpaRepository<Pill, Long> {
 
     // READ
     List<Pill> findAllByUserId(Long userId);
+
+    // DELETE
+    void deleteAllByUserId(Long userId);
 }
