@@ -97,11 +97,12 @@ public class AuthController {
             summary = "소복소복 회원 탈퇴",
             description = "소복소복 서비스를 탈퇴하는 API 입니다."
     )
-    public ResponseEntity<ApiResponse<Void>> refresh(
+    public ResponseEntity<ApiResponse<Void>> leave(
+            @RequestBody @Valid final LeaveRequest request,
             @AuthenticationPrincipal User user
     ) {
 
-        authService.leave(user.getId());
+        authService.leave(user.getId(), request.text());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(

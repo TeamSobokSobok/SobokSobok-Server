@@ -46,6 +46,9 @@ public class User extends BaseEntity implements UserDetails {
     @Column
     private LocalDateTime deletedAt;
 
+    @Column
+    private String leaveReason;
+
     @Builder
     public User(String username, SocialInfo socialInfo, String deviceToken, String roles) {
         this.username = username;
@@ -62,10 +65,11 @@ public class User extends BaseEntity implements UserDetails {
         this.username = username;
     }
 
-    public void deleteUser() {
+    public void deleteUser(String leaveReason) {
         this.deviceToken = "";
         this.username = "";
         this.isDeleted = true;
+        this.leaveReason = leaveReason;
         this.deletedAt = LocalDateTime.now();
         this.socialInfo.removeSocialInfo();
     }

@@ -60,7 +60,7 @@ public class AuthService {
     }
 
     @Transactional
-    public void leave(Long userId) {
+    public void leave(Long userId, String leaveReason) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_USER));
@@ -71,6 +71,6 @@ public class AuthService {
         }
 
         redisTemplate.delete(user.getSocialInfo().getSocialId());
-        user.deleteUser();
+        user.deleteUser(leaveReason);
     }
 }
