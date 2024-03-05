@@ -27,6 +27,13 @@ public class UserService {
     }
 
     @Transactional
+    public String getMyUsername(Long userId) {
+        User user = UserServiceUtil.findUserById(userRepository, userId);
+
+        return user.getUsername();
+    }
+
+    @Transactional
     public List<UsernameResponse> getUsername(Long userId, String username) {
         UserServiceUtil.existsUserById(userRepository, userId);
 
