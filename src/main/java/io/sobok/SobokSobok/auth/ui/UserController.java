@@ -25,6 +25,20 @@ public class UserController {
 
     private final UserService userService;
 
+    @GetMapping("/info")
+    @Operation(
+            summary = "내 닉네임 조회 API",
+            description = "메인 캘린더 뷰에서 사용자의 이름을 나타낼 때 사용합니다."
+    )
+    public ResponseEntity<ApiResponse<String>> getUsername(@AuthenticationPrincipal User user) {
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(
+                        SuccessCode.GET_USERNAME_SUCCESS,
+                        userService.getMyUsername(user.getId())
+                ));
+    }
+
     @GetMapping("")
     @Operation(
             summary = "닉네임 중복 확인 API 메서드",
