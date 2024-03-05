@@ -69,7 +69,7 @@ public class NoticeController {
             @RequestBody @Valid final CompletePillNoticeRequest request
     ) {
 
-        noticeService.completePillNotice(5L, pillId, request.isOkay());
+        noticeService.completePillNotice(user.getId(), pillId, request.isOkay());
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(

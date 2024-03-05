@@ -9,10 +9,12 @@ import io.sobok.SobokSobok.auth.domain.User;
 import io.sobok.SobokSobok.auth.infrastructure.UserRepository;
 import io.sobok.SobokSobok.external.firebase.dto.PushNotificationRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class FCMPushService {
 
     private final FirebaseMessaging firebaseMessaging;
@@ -36,7 +38,7 @@ public class FCMPushService {
         try {
             firebaseMessaging.send(message);
         } catch (FirebaseMessagingException e) {
-            throw new IllegalArgumentException("푸시알림 전송에 실패했습니다. userId: " + request.userId() + "\n" + e.getMessage());
+            log.error("푸시알림 전송에 실패했습니다. userId: " + request.userId() + "\n" + e.getMessage());
         }
     }
 }
