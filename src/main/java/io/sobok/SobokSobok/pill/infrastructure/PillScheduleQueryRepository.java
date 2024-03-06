@@ -102,6 +102,7 @@ public class PillScheduleQueryRepository {
             List<Long> pillScheduleIds = queryFactory
                     .select(pillSchedule.id)
                     .from(pillSchedule)
+                    .join(pill).on(pill.id.eq(pillSchedule.pillId), pill.userId.eq(userId))
                     .where(pillSchedule.scheduleDate.eq(date), pillSchedule.scheduleTime.eq(time))
                     .fetch();
 
