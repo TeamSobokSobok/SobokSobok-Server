@@ -18,6 +18,7 @@ import io.sobok.SobokSobok.security.jwt.JwtProvider;
 import io.sobok.SobokSobok.sticker.infrastructure.LikeScheduleQueryRepository;
 import io.sobok.SobokSobok.sticker.infrastructure.LikeScheduleRepository;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Not;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.core.Authentication;
@@ -56,8 +57,10 @@ public class AuthService {
     public JwtTokenResponse refresh(String token) {
 
         Authentication authentication = jwtProvider.getAuthentication(token);
-        String socialId = authentication.getName();
-
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                        .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_USER));
+        String socialId = user.getSocialInfo().getSocialId();
         if (socialId == null) {
             throw new NotFoundException(ErrorCode.UNREGISTERED_TOKEN);
         }
