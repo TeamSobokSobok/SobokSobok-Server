@@ -9,29 +9,30 @@ if [ $CURRENT_PROFILE == deploy-one ]
 then
   IDLE_PROFILE=deploy-two
   IDLE_PORT=8082
+  LIVE_PORT=8081
 elif [ $CURRENT_PROFILE == deploy-two ]
 then
   IDLE_PROFILE=deploy-one
   IDLE_PORT=8081
+  LIVE_PORT=8082
 else
   echo "> 일치하는 Profile이 없습니다. Profile: $CURRENT_PROFILE"
-  echo "> deplony-one을 할당합니다. IDLE_PROFILE: deploy-one"
+  echo "> deploy-one을 할당합니다. IDLE_PROFILE: deploy-one"
   IDLE_PROFILE=deploy-one
   IDLE_PORT=8081
+  LIVE_PORT=8082
 fi
 
-IDLE_APPLICATION=SobokSobok-0.0.1-SNAPSHOT.jar
-
 echo "> $IDLE_PROFILE 에서 구동중인 애플리케이션 pid 확인"
-IDLE_PID=$(pgrep -f $IDLE_PROFILE)
+IDLE_PID=$(pgrep -f $IDLE_APPLICATION.$IDLE_PROFILE)
 
-if [ -z $IDLE_PID ]
+if [ -z "$IDLE_PID" ]
 then
   echo "> 현재 구동중인 애플리케이션이 없으므로 종료하지 않습니다."
 else
   echo "> kill -15 $IDLE_PID"
   kill -15 $IDLE_PID
-  sleep 60
+  sleep 10
 fi
 
 echo "> $IDLE_PROFILE 배포"
@@ -47,12 +48,12 @@ do
   up_count=$(echo $response | grep 'UP' | wc -l)
 
   if [ $up_count -ge 1 ]
-  then # $up_count >= 1 ("UP" 문자열이 있는지 검증)
+  then
       echo "> Health check 성공"
       break
   else
       echo "> Health check의 응답을 알 수 없거나 혹은 status가 UP이 아닙니다."
-      echo "> Health check: ${response}"
+      echo "> Health check: $response"
   fi
 
   if [ $retry_count -eq 10 ]
@@ -66,23 +67,18 @@ do
   sleep 10
 done
 
-echo "> 스위칭"
-sleep 10
-echo "> 현재 구동중인 Port 확인"
-CURRENT_PROFILE=$(curl -s http://localhost/profile)
+echo "> $LIVE_PORT에서 구동 중인 이전 버전의 애플리케이션 PID 확인"
+LIVE_PID=$(sudo lsof -ti :$LIVE_PORT)
 
-if [ $CURRENT_PROFILE == deploy-one ]
-then
-  IDLE_PORT=8082
-elif [ $CURRENT_PROFILE == deploy-two ]
-then
-  IDLE_PORT=8081
+if [ ! -z "$LIVE_PID" ]; then
+  echo "> kill -15 $LIVE_PID"
+  kill -15 $LIVE_PID
+  echo "> 이전 버전의 애플리케이션을 종료했습니다."
 else
-  echo "> 일치하는 Profile이 없습니다. Profile: $CURRENT_PROFILE"
-  echo "> 8081을 할당합니다."
-  IDLE_PORT=8081
+  echo "> 이전 버전의 애플리케이션이 구동 중이지 않아 종료하지 않습니다."
 fi
 
+echo "> 스위칭"
 echo "> 전환할 Port: $IDLE_PORT"
 echo "> Port 전환"
 echo "set \$service_url http://127.0.0.1:${IDLE_PORT};" |sudo tee /etc/nginx/conf.d/service-url.inc
