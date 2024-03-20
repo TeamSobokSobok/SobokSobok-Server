@@ -188,14 +188,14 @@ public class FriendService {
     }
 
     @Transactional
-    public Boolean checkFriendRequest(Long userId, Long friendId) {
+    public Boolean checkFriendRequest(Long userId, Long memberId) {
 
         boolean AlreadyFriendRequest = false;
 
         UserServiceUtil.existsUserById(userRepository, userId);
-        UserServiceUtil.existsUserById(userRepository, friendId);
+        UserServiceUtil.existsUserById(userRepository, memberId);
 
-        if (friendQueryRepository.isAlreadyFriend(userId, friendId) || noticeRepository.existsBySenderIdAndReceiverIdAndIsOkay(userId, friendId, NoticeStatus.WAITING)) {
+        if (friendQueryRepository.isAlreadyFriend(userId, memberId) || noticeRepository.existsBySenderIdAndReceiverIdAndIsOkay(userId, memberId, NoticeStatus.WAITING)) {
             AlreadyFriendRequest = true;
         }
 
