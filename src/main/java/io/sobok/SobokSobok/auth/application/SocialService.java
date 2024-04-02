@@ -10,9 +10,9 @@ import io.sobok.SobokSobok.auth.ui.dto.SocialSignupRequest;
 import io.sobok.SobokSobok.auth.ui.dto.SocialSignupResponse;
 import io.sobok.SobokSobok.exception.ErrorCode;
 import io.sobok.SobokSobok.exception.model.ConflictException;
-import io.sobok.SobokSobok.exception.model.NotFoundException;
 import io.sobok.SobokSobok.security.jwt.Jwt;
 import io.sobok.SobokSobok.security.jwt.JwtProvider;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,39 +36,48 @@ public class SocialService {
         }
 
         User signupUser = userRepository.save(User.builder()
-                .username(request.username())
-                .socialInfo(SocialInfo.builder()
-                        .socialId(request.socialId())
-                        .build())
-                .deviceToken(request.deviceToken())
-                .roles(Role.USER.name())
-                .build());
+            .username(request.username())
+            .socialInfo(SocialInfo.builder()
+                .socialId(request.socialId())
+                .build())
+            .deviceToken(request.deviceToken())
+            .roles(Role.USER.name())
+            .build());
 
         Jwt jwt = jwtProvider.getUserJwt(signupUser.getSocialInfo().getSocialId());
 
         return SocialSignupResponse.builder()
-                .id(signupUser.getId())
-                .username(signupUser.getUsername())
-                .socialId(signupUser.getSocialInfo().getSocialId())
-                .accessToken(jwt.accessToken())
-                .refreshToken(jwt.refreshToken())
-                .build();
+            .id(signupUser.getId())
+            .username(signupUser.getUsername())
+            .socialId(signupUser.getSocialInfo().getSocialId())
+            .accessToken(jwt.accessToken())
+            .refreshToken(jwt.refreshToken())
+            .build();
     }
 
     @Transactional
     public SocialLoginResponse login(SocialLoginRequest request) {
-        User loginUser = userRepository.findBySocialInfoSocialId(request.socialId())
-                .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_USER));
+        Optional<User> optionalLoginUser = userRepository.findBySocialInfoSocialId(
+            request.socialId());
 
-       if (!request.deviceToken().equals(loginUser.getDeviceToken())) {
-           loginUser.updateDeviceToken(request.deviceToken());
-       }
+        if (optionalLoginUser.isPresent()) {
+            User loginUser = optionalLoginUser.get();
 
-       Jwt jwt = jwtProvider.getUserJwt(loginUser.getSocialInfo().getSocialId());
+            if (!request.deviceToken().equals(loginUser.getDeviceToken())) {
+                loginUser.updateDeviceToken(request.deviceToken());
+            }
 
-        return SocialLoginResponse.builder()
+            Jwt jwt = jwtProvider.getUserJwt(loginUser.getSocialInfo().getSocialId());
+
+            return SocialLoginResponse.builder()
                 .accessToken(jwt.accessToken())
                 .refreshToken(jwt.refreshToken())
+                .isNew(false)
                 .build();
+        } else {
+            return SocialLoginResponse.builder()
+                .isNew(true)
+                .build();
+        }
     }
 }
