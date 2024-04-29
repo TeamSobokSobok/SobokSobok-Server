@@ -122,12 +122,8 @@ public class AuthController {
     private Platform getDevicePlatform(String userAgent) {
         if (userAgent.toLowerCase().contains("android")) {
             return Platform.Android;
-        }
-
-        if (userAgent.toLowerCase().matches(".*(iphone|ipad|ipod).*")) {
+        } else {
             return Platform.iOS;
         }
-
-        throw new BadRequestException(ErrorCode.INVALID_PLATFORM);
     }
 }
