@@ -51,12 +51,12 @@ public class SocialService {
         Jwt jwt = jwtProvider.getUserJwt(signupUser.getSocialInfo().getSocialId());
 
         return SocialSignupResponse.builder()
-                .id(signupUser.getId())
-                .username(signupUser.getUsername())
-                .socialId(signupUser.getSocialInfo().getSocialId())
-                .accessToken(jwt.accessToken())
-                .refreshToken(jwt.refreshToken())
-                .build();
+            .id(signupUser.getId())
+            .username(signupUser.getUsername())
+            .socialId(signupUser.getSocialInfo().getSocialId())
+            .accessToken(jwt.accessToken())
+            .refreshToken(jwt.refreshToken())
+            .build();
     }
 
     @Transactional
