@@ -182,3 +182,6 @@ application-prod.yml
 
 # firebase admin sdk
 soboksobok-564b3-firebase-adminsdk-l4k48-58b981ed69.json
+
+# Mac
+.DS_Store
