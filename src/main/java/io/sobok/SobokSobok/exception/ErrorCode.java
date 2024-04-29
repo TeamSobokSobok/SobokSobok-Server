@@ -15,6 +15,7 @@ public enum ErrorCode {
     BAD_REQUEST_EXCEPTION(HttpStatus.BAD_REQUEST, "잘못된 형식의 요청입니다."),
     FILE_SAVE_EXCEPTION(HttpStatus.INTERNAL_SERVER_ERROR, "파일 생성에 실패했습니다."),
     FORBIDDEN_EXCEPTION(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
+    INVALID_PLATFORM(HttpStatus.BAD_REQUEST, "허용되지 않은 플랫폼입니다."),
 
     // auth
     UNREGISTERED_USER(HttpStatus.NOT_FOUND, "등록되지 않은 사용자입니다."),

@@ -1,5 +1,6 @@
 package io.sobok.SobokSobok.auth.application;
 
+import io.sobok.SobokSobok.auth.domain.Platform;
 import io.sobok.SobokSobok.auth.domain.Role;
 import io.sobok.SobokSobok.auth.domain.SocialInfo;
 import io.sobok.SobokSobok.auth.domain.User;
@@ -12,7 +13,9 @@ import io.sobok.SobokSobok.exception.ErrorCode;
 import io.sobok.SobokSobok.exception.model.ConflictException;
 import io.sobok.SobokSobok.security.jwt.Jwt;
 import io.sobok.SobokSobok.security.jwt.JwtProvider;
+
 import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,7 +29,7 @@ public class SocialService {
     private final JwtProvider jwtProvider;
 
     @Transactional
-    public SocialSignupResponse signup(SocialSignupRequest request) {
+    public SocialSignupResponse signup(SocialSignupRequest request, Platform platform) {
         if (userRepository.existsBySocialInfoSocialId(request.socialId())) {
             throw new ConflictException(ErrorCode.ALREADY_EXISTS_USER);
         }
@@ -36,13 +39,14 @@ public class SocialService {
         }
 
         User signupUser = userRepository.save(User.builder()
-            .username(request.username())
-            .socialInfo(SocialInfo.builder()
-                .socialId(request.socialId())
-                .build())
-            .deviceToken(request.deviceToken())
-            .roles(Role.USER.name())
-            .build());
+                .username(request.username())
+                .socialInfo(SocialInfo.builder()
+                        .socialId(request.socialId())
+                        .build())
+                .deviceToken(request.deviceToken())
+                .roles(Role.USER.name())
+                .platform(platform)
+                .build());
 
         Jwt jwt = jwtProvider.getUserJwt(signupUser.getSocialInfo().getSocialId());
 
@@ -56,9 +60,9 @@ public class SocialService {
     }
 
     @Transactional
-    public SocialLoginResponse login(SocialLoginRequest request) {
+    public SocialLoginResponse login(SocialLoginRequest request, Platform platform) {
         Optional<User> optionalLoginUser = userRepository.findBySocialInfoSocialId(
-            request.socialId());
+                request.socialId());
 
         if (optionalLoginUser.isPresent()) {
             User loginUser = optionalLoginUser.get();
@@ -67,17 +71,21 @@ public class SocialService {
                 loginUser.updateDeviceToken(request.deviceToken());
             }
 
+            if (!platform.equals(loginUser.getPlatform())) {
+                loginUser.updatePlatform(platform);
+            }
+
             Jwt jwt = jwtProvider.getUserJwt(loginUser.getSocialInfo().getSocialId());
 
             return SocialLoginResponse.builder()
-                .accessToken(jwt.accessToken())
-                .refreshToken(jwt.refreshToken())
-                .isNew(false)
-                .build();
+                    .accessToken(jwt.accessToken())
+                    .refreshToken(jwt.refreshToken())
+                    .isNew(false)
+                    .build();
         } else {
             return SocialLoginResponse.builder()
-                .isNew(true)
-                .build();
+                    .isNew(true)
+                    .build();
         }
     }
 }
