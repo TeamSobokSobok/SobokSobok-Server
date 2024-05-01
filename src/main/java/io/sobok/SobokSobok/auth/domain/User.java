@@ -49,25 +49,16 @@ public class User extends BaseEntity implements UserDetails {
     @Column
     private String leaveReason;
 
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Platform platform;
-
     @Builder
-    public User(String username, SocialInfo socialInfo, String deviceToken, String roles, Platform platform) {
+    public User(String username, SocialInfo socialInfo, String deviceToken, String roles) {
         this.username = username;
         this.socialInfo = socialInfo;
         this.deviceToken = deviceToken;
         this.roles = roles;
-        this.platform = platform;
     }
 
     public void updateDeviceToken(String newDeviceToken) {
         this.deviceToken = newDeviceToken;
-    }
-
-    public void updatePlatform(Platform newPlatform) {
-        this.platform = newPlatform;
     }
 
     public void changeUsername(String username) {

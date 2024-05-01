@@ -55,30 +55,6 @@ public class FCMPushService {
         sendMessageToFirebase(message, user.getId());
     }
 
-    private void sendNotification(User user, PushNotificationRequest request) {
-        Notification notification = Notification.builder()
-                .setTitle(request.title())
-                .setBody(request.body())
-                .build();
-
-        Message message = Message.builder()
-                .setToken(user.getDeviceToken())
-                .setNotification(notification)
-                .build();
-
-        sendMessageToFirebase(message, request.userId());
-    }
-
-    private void sendDataMessage(User user, PushNotificationRequest request) {
-        Message message = Message.builder()
-                .putData("title", request.title())
-                .putData("body", request.body())
-                .setToken(user.getDeviceToken())
-                .build();
-
-        sendMessageToFirebase(message, request.userId());
-    }
-
     private void sendMessageToFirebase(Message message, Long userId) {
         try {
             firebaseMessaging.send(message);
