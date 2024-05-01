@@ -47,6 +47,7 @@ public class PillPushNotificationService {
                     .userId(pill.getUserId())
                     .title("[" + pill.getPillName() + "]" + DateUtil.getKoreanTime(time))
                     .body("소중한 '" + user.getUsername() + "'님, 약 드실 시간이에요\n다 드시면 앱에서 체크 버튼을 눌러주세요")
+                    .type("main")
                     .build()
             );
         }

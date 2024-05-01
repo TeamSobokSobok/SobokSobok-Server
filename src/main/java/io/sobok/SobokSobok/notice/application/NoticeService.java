@@ -104,6 +104,7 @@ public class NoticeService {
             fcmPushService.sendNotificationByToken(PushNotificationRequest.builder()
                     .userId(sender.getId())
                     .title(receiver.getUsername() + "님이 약 일정을 거절했어요")
+                            .type("notice")
                     .build());
         }
 
@@ -113,6 +114,7 @@ public class NoticeService {
             fcmPushService.sendNotificationByToken(PushNotificationRequest.builder()
                     .userId(sender.getId())
                     .title(receiver.getUsername() + "님이 약 일정을 수락했어요")
+                            .type("notice")
                     .build());
         }
 

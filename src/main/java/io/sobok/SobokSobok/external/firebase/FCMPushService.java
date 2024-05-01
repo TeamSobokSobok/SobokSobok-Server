@@ -49,6 +49,7 @@ public class FCMPushService {
                 )
                 .putData("title", request.title())
                 .putData("body", request.body())
+                .putData("type", request.type())
                 .build();
 
         sendMessageToFirebase(message, user.getId());

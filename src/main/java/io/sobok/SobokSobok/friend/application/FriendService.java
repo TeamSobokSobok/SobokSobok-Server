@@ -26,9 +26,11 @@ import io.sobok.SobokSobok.notice.domain.NoticeStatus;
 import io.sobok.SobokSobok.notice.domain.NoticeType;
 import io.sobok.SobokSobok.notice.infrastructure.NoticeQueryRepository;
 import io.sobok.SobokSobok.notice.infrastructure.NoticeRepository;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,43 +59,44 @@ public class FriendService {
         User receiver = UserServiceUtil.findUserById(userRepository, request.memberId());
 
         if (friendRepository.countBySenderId(sender.getId()) >= 5 ||
-            friendRepository.countBySenderId(receiver.getId()) >= 5) {
+                friendRepository.countBySenderId(receiver.getId()) >= 5) {
             throw new ConflictException(ErrorCode.EXCEEDED_FRIEND_COUNT);
         }
 
         if (noticeQueryRepository.isAlreadyFriendRequestFromSender(sender.getId(), receiver.getId())
-            || noticeQueryRepository.isAlreadyFriendRequestFromSender(receiver.getId(),
-            sender.getId())) {
+                || noticeQueryRepository.isAlreadyFriendRequestFromSender(receiver.getId(),
+                sender.getId())) {
             throw new ConflictException(ErrorCode.ALREADY_FRIEND);
         }
 
         Notice notice = noticeRepository.save(
-            Notice.newInstance(
-                sender.getId(),
-                receiver.getId(),
-                NoticeType.FRIEND,
-                NoticeStatus.WAITING
-            )
+                Notice.newInstance(
+                        sender.getId(),
+                        receiver.getId(),
+                        NoticeType.FRIEND,
+                        NoticeStatus.WAITING
+                )
         );
 
         sendFriendRepository.save(
-            SendFriend.newInstance(
-                notice.getId(),
-                request.friendName()
-            )
+                SendFriend.newInstance(
+                        notice.getId(),
+                        request.friendName()
+                )
         );
 
         fcmPushService.sendNotificationByToken(PushNotificationRequest.builder()
                 .userId(receiver.getId())
                 .title(sender.getUsername() + "님이 친구를 신청했어요")
+                .type("notice")
                 .build());
 
         return AddFriendResponse.builder()
-            .noticeId(notice.getId())
-            .senderName(sender.getUsername())
-            .memberName(receiver.getUsername())
-            .isOkay(NoticeStatus.WAITING)
-            .build();
+                .noticeId(notice.getId())
+                .senderName(sender.getUsername())
+                .memberName(receiver.getUsername())
+                .isOkay(NoticeStatus.WAITING)
+                .build();
     }
 
     @Transactional(readOnly = true)
@@ -101,22 +104,22 @@ public class FriendService {
         UserServiceUtil.existsUserById(userRepository, userId);
 
         return friendRepository.findAllBySenderId(userId)
-            .stream().map(friend ->
-                FriendListResponse.builder()
-                    .friendId(friend.getId())
-                    .memberId(friend.getReceiverId())
-                    .friendName(friend.getFriendName())
-                    .build()
-            ).collect(Collectors.toList());
+                .stream().map(friend ->
+                        FriendListResponse.builder()
+                                .friendId(friend.getId())
+                                .memberId(friend.getReceiverId())
+                                .friendName(friend.getFriendName())
+                                .build()
+                ).collect(Collectors.toList());
     }
 
     @Transactional(noRollbackFor = {ConflictException.class})
     public HandleFriendRequestResponse updateNoticeStatus(Long userId, Long noticeId,
-        HandleFriendRequest request) {
+                                                          HandleFriendRequest request) {
         UserServiceUtil.existsUserById(userRepository, userId);
 
         Notice notice = noticeRepository.findById(noticeId)
-            .orElseThrow(() -> new BadRequestException(ErrorCode.BAD_REQUEST_EXCEPTION));
+                .orElseThrow(() -> new BadRequestException(ErrorCode.BAD_REQUEST_EXCEPTION));
 
         if (!userId.equals(notice.getReceiverId())) {
             throw new ForbiddenException(ErrorCode.FORBIDDEN_EXCEPTION);
@@ -126,7 +129,7 @@ public class FriendService {
         User receiver = UserServiceUtil.findUserById(userRepository, userId);
 
         if (friendRepository.countBySenderId(userId) >= 5 ||
-            friendRepository.countBySenderId(sender.getId()) >= 5) {
+                friendRepository.countBySenderId(sender.getId()) >= 5) {
             notice.updateIsOkay(NoticeStatus.REFUSE);
             throw new ConflictException(ErrorCode.EXCEEDED_FRIEND_COUNT);
         }
@@ -136,34 +139,36 @@ public class FriendService {
         if (request.isOkay() == NoticeStatus.ACCEPT) {
             SendFriend sendFriend = sendFriendRepository.findByNoticeId(noticeId);
             friendRepository.save(Friend.newInstance(
-                sender.getId(),
-                userId,
-                sendFriend.getFriendName()
+                    sender.getId(),
+                    userId,
+                    sendFriend.getFriendName()
             ));
 
             friendRepository.save(Friend.newInstance(
-                userId,
-                sender.getId(),
-                sender.getUsername()
+                    userId,
+                    sender.getId(),
+                    sender.getUsername()
             ));
 
             fcmPushService.sendNotificationByToken(PushNotificationRequest.builder()
                     .userId(sender.getId())
                     .title(receiver.getUsername() + "님이 친구를 수락했어요")
+                            .type("notice")
                     .build());
         } else {
             fcmPushService.sendNotificationByToken(PushNotificationRequest.builder()
                     .userId(sender.getId())
                     .title(receiver.getUsername() + "님이 친구를 거절했어요")
+                            .type("notice")
                     .build());
         }
 
         return HandleFriendRequestResponse.builder()
-            .noticeId(notice.getId())
-            .memberName(sender.getUsername())
-            .isOkay(request.isOkay())
-            .updatedAt(LocalDateTime.now())
-            .build();
+                .noticeId(notice.getId())
+                .memberName(sender.getUsername())
+                .isOkay(request.isOkay())
+                .updatedAt(LocalDateTime.now())
+                .build();
     }
 
     @Transactional
@@ -171,7 +176,7 @@ public class FriendService {
         UserServiceUtil.existsUserById(userRepository, userId);
 
         Friend friend = friendRepository.findById(friendId)
-            .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_EXCEPTION));
+                .orElseThrow(() -> new ForbiddenException(ErrorCode.FORBIDDEN_EXCEPTION));
 
         if (!friend.getSenderId().equals(userId)) {
             throw new ForbiddenException(ErrorCode.FORBIDDEN_EXCEPTION);
@@ -180,11 +185,11 @@ public class FriendService {
         friend.updateFriendName(request.friendName());
 
         return UpdateFriendNameResponse.builder()
-            .friendId(friendId)
-            .userId(userId)
-            .memberId(friend.getReceiverId())
-            .friendName(request.friendName())
-            .build();
+                .friendId(friendId)
+                .userId(userId)
+                .memberId(friend.getReceiverId())
+                .friendName(request.friendName())
+                .build();
     }
 
     @Transactional
