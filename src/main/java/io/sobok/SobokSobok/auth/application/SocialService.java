@@ -1,6 +1,5 @@
 package io.sobok.SobokSobok.auth.application;
 
-import io.sobok.SobokSobok.auth.domain.Platform;
 import io.sobok.SobokSobok.auth.domain.Role;
 import io.sobok.SobokSobok.auth.domain.SocialInfo;
 import io.sobok.SobokSobok.auth.domain.User;
@@ -29,7 +28,7 @@ public class SocialService {
     private final JwtProvider jwtProvider;
 
     @Transactional
-    public SocialSignupResponse signup(SocialSignupRequest request, Platform platform) {
+    public SocialSignupResponse signup(SocialSignupRequest request) {
         if (userRepository.existsBySocialInfoSocialId(request.socialId())) {
             throw new ConflictException(ErrorCode.ALREADY_EXISTS_USER);
         }
@@ -45,7 +44,6 @@ public class SocialService {
                         .build())
                 .deviceToken(request.deviceToken())
                 .roles(Role.USER.name())
-                .platform(platform)
                 .build());
 
         Jwt jwt = jwtProvider.getUserJwt(signupUser.getSocialInfo().getSocialId());
@@ -60,7 +58,7 @@ public class SocialService {
     }
 
     @Transactional
-    public SocialLoginResponse login(SocialLoginRequest request, Platform platform) {
+    public SocialLoginResponse login(SocialLoginRequest request) {
         Optional<User> optionalLoginUser = userRepository.findBySocialInfoSocialId(
                 request.socialId());
 
@@ -69,10 +67,6 @@ public class SocialService {
 
             if (!request.deviceToken().equals(loginUser.getDeviceToken())) {
                 loginUser.updateDeviceToken(request.deviceToken());
-            }
-
-            if (!platform.equals(loginUser.getPlatform())) {
-                loginUser.updatePlatform(platform);
             }
 
             Jwt jwt = jwtProvider.getUserJwt(loginUser.getSocialInfo().getSocialId());

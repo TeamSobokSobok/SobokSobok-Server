@@ -2,13 +2,10 @@ package io.sobok.SobokSobok.auth.ui;
 
 import io.sobok.SobokSobok.auth.application.AuthService;
 import io.sobok.SobokSobok.auth.application.SocialService;
-import io.sobok.SobokSobok.auth.domain.Platform;
 import io.sobok.SobokSobok.auth.domain.User;
 import io.sobok.SobokSobok.auth.ui.dto.*;
 import io.sobok.SobokSobok.common.dto.ApiResponse;
-import io.sobok.SobokSobok.exception.ErrorCode;
 import io.sobok.SobokSobok.exception.SuccessCode;
-import io.sobok.SobokSobok.exception.model.BadRequestException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -33,16 +30,14 @@ public class AuthController {
             description = "사용자의 소셜 정보로 소복소복에 회원가입하는 API 입니다."
     )
     public ResponseEntity<ApiResponse<SocialSignupResponse>> signup(
-            @RequestHeader(name = "User-Agent") String userAgent,
             @RequestBody @Valid final SocialSignupRequest request
     ) {
 
-        Platform platform = getDevicePlatform(userAgent);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(
                         SuccessCode.SOCIAL_SIGNUP_SUCCESS,
-                        socialService.signup(request, platform)
+                        socialService.signup(request)
                 ));
     }
 
@@ -52,12 +47,10 @@ public class AuthController {
             description = "사용자의 소셜 정보로 소복소복에 로그인하는 API 입니다."
     )
     public ResponseEntity<ApiResponse<SocialLoginResponse>> login(
-            @RequestHeader(name = "User-Agent") String userAgent,
             @RequestParam final String socialId,
             @RequestParam final String deviceToken
     ) {
 
-        Platform platform = getDevicePlatform(userAgent);
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(ApiResponse.success(
@@ -65,7 +58,7 @@ public class AuthController {
                         socialService.login(SocialLoginRequest.builder()
                                 .socialId(socialId)
                                 .deviceToken(deviceToken)
-                                .build(), platform)
+                                .build())
                 ));
     }
 
@@ -117,13 +110,5 @@ public class AuthController {
                 .body(ApiResponse.success(
                         SuccessCode.USER_LEAVE_SUCCESS
                 ));
-    }
-
-    private Platform getDevicePlatform(String userAgent) {
-        if (userAgent.toLowerCase().contains("android")) {
-            return Platform.Android;
-        } else {
-            return Platform.iOS;
-        }
     }
 }
