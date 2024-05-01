@@ -24,8 +24,10 @@ import io.sobok.SobokSobok.sticker.infrastructure.StickerRepository;
 import io.sobok.SobokSobok.sticker.ui.dto.ReceivedStickerResponse;
 import io.sobok.SobokSobok.sticker.ui.dto.StickerActionResponse;
 import io.sobok.SobokSobok.sticker.ui.dto.StickerResponse;
+
 import java.util.List;
 import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,10 +49,10 @@ public class StickerService {
     @Transactional
     public List<StickerResponse> getStickerList() {
         return stickerRepository.findAll().stream().map(
-            sticker -> StickerResponse.builder()
-                .stickerId(sticker.getId())
-                .stickerImg(sticker.getStickerImg())
-                .build()
+                sticker -> StickerResponse.builder()
+                        .stickerId(sticker.getId())
+                        .stickerImg(sticker.getStickerImg())
+                        .build()
         ).collect(Collectors.toList());
     }
 
@@ -58,7 +60,7 @@ public class StickerService {
     public StickerActionResponse sendSticker(Long userId, Long scheduleId, Long stickerId) {
         UserServiceUtil.existsUserById(userRepository, userId);
         PillSchedule pillSchedule = PillScheduleServiceUtil.findPillScheduleById(
-            pillScheduleRepository, scheduleId);
+                pillScheduleRepository, scheduleId);
         StickerServiceUtil.existsStickerById(stickerRepository, stickerId);
 
         if (!pillSchedule.getIsCheck()) {
@@ -77,35 +79,36 @@ public class StickerService {
         }
 
         LikeSchedule likeSchedule = likeScheduleRepository.save(
-            LikeSchedule.builder()
-                .scheduleId(scheduleId)
-                .senderId(userId)
-                .stickerId(stickerId)
-                .build()
+                LikeSchedule.builder()
+                        .scheduleId(scheduleId)
+                        .senderId(userId)
+                        .stickerId(stickerId)
+                        .build()
         );
 
         fcmPushService.sendNotificationByToken(PushNotificationRequest.builder()
                 .userId(receiver.getId())
                 .title(senderUsername + "님이 " + pill.getPillName() + " 복약에 반응을 남겼어요!")
                 .body("받은 스티커를 확인해보세요")
+                .type("main")
                 .build());
 
         return StickerActionResponse.builder()
-            .likeScheduleId(likeSchedule.getId())
-            .scheduleId(likeSchedule.getScheduleId())
-            .senderId(likeSchedule.getSenderId())
-            .stickerId(likeSchedule.getStickerId())
-            .createdAt(likeSchedule.getCreatedAt())
-            .updatedAt(likeSchedule.getUpdatedAt())
-            .build();
+                .likeScheduleId(likeSchedule.getId())
+                .scheduleId(likeSchedule.getScheduleId())
+                .senderId(likeSchedule.getSenderId())
+                .stickerId(likeSchedule.getStickerId())
+                .createdAt(likeSchedule.getCreatedAt())
+                .updatedAt(likeSchedule.getUpdatedAt())
+                .build();
     }
 
     @Transactional
     public StickerActionResponse updateSendSticker(Long userId, Long likeScheduleId,
-        Long stickerId) {
+                                                   Long stickerId) {
         UserServiceUtil.existsUserById(userRepository, userId);
         LikeSchedule likeSchedule = likeScheduleRepository.findById(likeScheduleId)
-            .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_LIKE_SCHEDULE));
+                .orElseThrow(() -> new NotFoundException(ErrorCode.UNREGISTERED_LIKE_SCHEDULE));
         StickerServiceUtil.existsStickerById(stickerRepository, stickerId);
 
         if (!likeSchedule.isLikeScheduleSender(userId)) {
@@ -115,20 +118,20 @@ public class StickerService {
         likeSchedule.changeSticker(stickerId);
 
         return StickerActionResponse.builder()
-            .likeScheduleId(likeSchedule.getId())
-            .scheduleId(likeSchedule.getScheduleId())
-            .senderId(likeSchedule.getSenderId())
-            .stickerId(likeSchedule.getStickerId())
-            .createdAt(likeSchedule.getCreatedAt())
-            .updatedAt(likeSchedule.getUpdatedAt())
-            .build();
+                .likeScheduleId(likeSchedule.getId())
+                .scheduleId(likeSchedule.getScheduleId())
+                .senderId(likeSchedule.getSenderId())
+                .stickerId(likeSchedule.getStickerId())
+                .createdAt(likeSchedule.getCreatedAt())
+                .updatedAt(likeSchedule.getUpdatedAt())
+                .build();
     }
 
     @Transactional
     public List<ReceivedStickerResponse> getReceivedStickerList(Long userId, Long scheduleId) {
         UserServiceUtil.existsUserById(userRepository, userId);
         PillSchedule pillSchedule = PillScheduleServiceUtil.findPillScheduleById(
-            pillScheduleRepository, scheduleId);
+                pillScheduleRepository, scheduleId);
         Pill pill = PillServiceUtil.findPillById(pillRepository, pillSchedule.getPillId());
 
         if (!pill.isPillUser(userId) && !friendQueryRepository.isAlreadyFriend(userId, pill.getUserId())) {

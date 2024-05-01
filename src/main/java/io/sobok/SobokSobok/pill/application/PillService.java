@@ -137,6 +137,7 @@ public class PillService {
                 .userId(friendId)
                 .title(receiverUsername + "님이 보낸 약 일정을 확인해보세요!")
                 .body(pillNameSentence.toString())
+                        .type("notice")
                 .build());
     }
 

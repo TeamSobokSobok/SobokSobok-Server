@@ -12,6 +12,7 @@ public record PushNotificationRequest(
         String title,
         String body,
         String image,
-        Map<String, String> data
+        Map<String, String> data,
+        String type
 ) {
 }
