@@ -1,11 +1,7 @@
 package io.sobok.SobokSobok.external.firebase;
 
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingException;
-import com.google.firebase.messaging.Message;
-import com.google.firebase.messaging.Notification;
+import com.google.firebase.messaging.*;
 import io.sobok.SobokSobok.auth.application.util.UserServiceUtil;
-import io.sobok.SobokSobok.auth.domain.Platform;
 import io.sobok.SobokSobok.auth.domain.User;
 import io.sobok.SobokSobok.auth.infrastructure.UserRepository;
 import io.sobok.SobokSobok.external.firebase.dto.PushNotificationRequest;
@@ -24,11 +20,36 @@ public class FCMPushService {
 
     public void sendNotificationByToken(PushNotificationRequest request) {
         User user = UserServiceUtil.findUserById(userRepository, request.userId());
-        if (user.getPlatform() == Platform.iOS) {
-            sendNotification(user, request);
-        } else {
-            sendDataMessage(user, request);
-        }
+
+        Message message = Message.builder()
+                .setToken(user.getDeviceToken())
+                .setNotification(
+                        Notification.builder()
+                                .setTitle(request.title())
+                                .setBody(request.body())
+                                .build()
+                )
+                .setAndroidConfig(
+                        AndroidConfig.builder()
+                                .setNotification(
+                                        AndroidNotification.builder()
+                                                .setTitle(request.title())
+                                                .setBody(request.body())
+                                                .setClickAction("push_click")
+                                                .build()
+                                )
+                                .build()
+                )
+                .setApnsConfig(
+                        ApnsConfig.builder()
+                                .setAps(Aps.builder()
+                                        .setCategory("push_click")
+                                        .build())
+                                .build()
+                )
+                .build();
+
+        sendMessageToFirebase(message, user.getId());
     }
 
     private void sendNotification(User user, PushNotificationRequest request) {
