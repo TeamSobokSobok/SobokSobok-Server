@@ -48,7 +48,7 @@ public class FCMPushService {
                                 .build()
                 )
                 .putData("title", request.title())
-                .putData("body", request.body())
+                .putData("body", request.body() == null ? "" : request.body())
                 .putData("type", request.type())
                 .build();
 
