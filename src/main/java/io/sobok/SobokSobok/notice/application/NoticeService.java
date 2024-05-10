@@ -26,6 +26,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -47,6 +49,8 @@ public class NoticeService {
         User user = UserServiceUtil.findUserById(userRepository, userId);
 
         List<NoticeInfo> noticeList = noticeQueryRepository.getNoticeList(userId);
+        Comparator<NoticeInfo> compareByCreatedAt = Comparator.comparing(NoticeInfo::createdAt).reversed();
+        noticeList.sort(compareByCreatedAt);
 
         return NoticeResponse.builder()
                 .username(user.getUsername())
