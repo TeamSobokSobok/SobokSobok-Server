@@ -100,7 +100,7 @@ public class AuthController {
             description = "소복소복 서비스를 탈퇴하는 API 입니다."
     )
     public ResponseEntity<ApiResponse<Void>> leave(
-            @RequestBody @Valid final LeaveRequest request,
+            @RequestBody final LeaveRequest request,
             @AuthenticationPrincipal User user
     ) {
 
