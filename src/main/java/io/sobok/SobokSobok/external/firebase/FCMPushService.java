@@ -55,6 +55,44 @@ public class FCMPushService {
         sendMessageToFirebase(message, user.getId());
     }
 
+    public void sendNotificationByTokenWithFriendData(PushNotificationRequest request) {
+        User user = UserServiceUtil.findUserById(userRepository, request.userId());
+
+        Message message = Message.builder()
+                .setToken(user.getDeviceToken())
+                .setNotification(
+                        Notification.builder()
+                                .setTitle(request.title())
+                                .setBody(request.body())
+                                .build()
+                )
+                .setAndroidConfig(
+                        AndroidConfig.builder()
+                                .setNotification(
+                                        AndroidNotification.builder()
+                                                .setTitle(request.title())
+                                                .setBody(request.body())
+                                                .setClickAction("push_click")
+                                                .build()
+                                )
+                                .build()
+                )
+                .setApnsConfig(
+                        ApnsConfig.builder()
+                                .setAps(Aps.builder()
+                                        .setCategory("push_click")
+                                        .build())
+                                .build()
+                )
+                .putData("title", request.title())
+                .putData("body", request.body() == null ? "" : request.body())
+                .putData("type", request.type())
+                .putData("friendId", request.data().get("friendId"))
+                .build();
+
+        sendMessageToFirebase(message, user.getId());
+    }
+
     private void sendMessageToFirebase(Message message, Long userId) {
         try {
             firebaseMessaging.send(message);

@@ -29,6 +29,7 @@ import io.sobok.SobokSobok.notice.infrastructure.NoticeRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -150,16 +151,17 @@ public class FriendService {
                     sender.getUsername()
             ));
 
-            fcmPushService.sendNotificationByToken(PushNotificationRequest.builder()
+            fcmPushService.sendNotificationByTokenWithFriendData(PushNotificationRequest.builder()
                     .userId(sender.getId())
                     .title(receiver.getUsername() + "님이 친구를 수락했어요")
-                            .type("notice")
+                    .type("share")
+                    .data(Map.of("friendId", Long.toString(userId)))
                     .build());
         } else {
             fcmPushService.sendNotificationByToken(PushNotificationRequest.builder()
                     .userId(sender.getId())
                     .title(receiver.getUsername() + "님이 친구를 거절했어요")
-                            .type("notice")
+                    .type("notice")
                     .build());
         }
 
