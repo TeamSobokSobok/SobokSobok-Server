@@ -44,6 +44,7 @@ public class SocialService {
                         .build())
                 .deviceToken(request.deviceToken())
                 .roles(Role.USER.name())
+                .platform(request.platform())
                 .build());
 
         Jwt jwt = jwtProvider.getUserJwt(signupUser.getSocialInfo().getSocialId());
@@ -67,6 +68,10 @@ public class SocialService {
 
             if (!request.deviceToken().equals(loginUser.getDeviceToken())) {
                 loginUser.updateDeviceToken(request.deviceToken());
+            }
+
+            if (!request.platform().equals(loginUser.getPlatform())) {
+                loginUser.updatePlatform(request.platform());
             }
 
             Jwt jwt = jwtProvider.getUserJwt(loginUser.getSocialInfo().getSocialId());
