@@ -2,6 +2,7 @@ package io.sobok.SobokSobok.auth.ui;
 
 import io.sobok.SobokSobok.auth.application.AuthService;
 import io.sobok.SobokSobok.auth.application.SocialService;
+import io.sobok.SobokSobok.auth.domain.Platform;
 import io.sobok.SobokSobok.auth.domain.User;
 import io.sobok.SobokSobok.auth.ui.dto.*;
 import io.sobok.SobokSobok.common.dto.ApiResponse;
@@ -9,6 +10,7 @@ import io.sobok.SobokSobok.exception.SuccessCode;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,8 +50,9 @@ public class AuthController {
     )
     public ResponseEntity<ApiResponse<SocialLoginResponse>> login(
             @RequestParam final String socialId,
-            @RequestParam final String deviceToken
-    ) {
+            @RequestParam final String deviceToken,
+            @RequestParam final Platform platform
+            ) {
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -58,6 +61,7 @@ public class AuthController {
                         socialService.login(SocialLoginRequest.builder()
                                 .socialId(socialId)
                                 .deviceToken(deviceToken)
+                                .platform(platform)
                                 .build())
                 ));
     }
