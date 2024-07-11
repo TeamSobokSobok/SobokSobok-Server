@@ -58,6 +58,9 @@ public enum ErrorCode {
     UNREGISTERED_STICKER(HttpStatus.NOT_FOUND, "등록되지 않은 스티커입니다."),
     ALREADY_SEND_STICKER(HttpStatus.CONFLICT, "이미 스티커를 전송했습니다."),
     UNREGISTERED_LIKE_SCHEDULE(HttpStatus.NOT_FOUND, "스티커 전송기록이 존재하지 않습니다."),
+    NOT_FOUND_SAVE_IMAGE_EXCEPTION(HttpStatus.NOT_FOUND, "이미지 저장에 실패했습니다."),
+    NOT_FOUND_IMAGE_EXCEPTION(HttpStatus.NOT_FOUND, "이미지 이름을 찾을 수 없습니다."),
+    INVALID_MULTIPART_EXTENSION_EXCEPTION(HttpStatus.BAD_REQUEST, "허용되지 않은 타입의 파일입니다.")
     ;
 
     private final HttpStatus code;
