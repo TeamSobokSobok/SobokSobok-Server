@@ -37,7 +37,8 @@ public class SecurityConfig {
             "/auth/login",
             "/auth/refresh",
             "/user",
-            "/pill/count/**"
+            "/pill/count/**",
+            "/sticker/image"
     };
 
     private final JwtProvider jwtProvider;
