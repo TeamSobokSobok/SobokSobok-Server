@@ -1,23 +1,21 @@
 package io.sobok.SobokSobok.pill.infrastructure;
 
 import com.querydsl.core.Tuple;
-import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import io.sobok.SobokSobok.pill.domain.PillSchedule;
 import io.sobok.SobokSobok.pill.domain.QPill;
 import io.sobok.SobokSobok.pill.domain.QPillSchedule;
 import io.sobok.SobokSobok.pill.ui.dto.DateScheduleResponse;
 import io.sobok.SobokSobok.pill.ui.dto.MonthScheduleResponse;
 import io.sobok.SobokSobok.pill.ui.dto.PillScheduleInfo;
+import io.sobok.SobokSobok.pill.ui.dto.StickerInfo;
 import io.sobok.SobokSobok.sticker.domain.QLikeSchedule;
 import io.sobok.SobokSobok.sticker.domain.QSticker;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
-
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
@@ -106,17 +104,22 @@ public class PillScheduleQueryRepository {
                     .where(pillSchedule.scheduleDate.eq(date), pillSchedule.scheduleTime.eq(time))
                     .fetch();
 
-            Map<Long, List<Long>> stickerIdMap = pillScheduleIds.stream()
+            Map<Long, List<StickerInfo>> stickerIdMap = pillScheduleIds.stream()
                     .collect(Collectors.toMap(id -> id, id -> queryFactory
-                            .select(likeSchedule.stickerId)
+                            .select(likeSchedule.stickerId, likeSchedule.id)
                             .from(likeSchedule)
                             .where(likeSchedule.scheduleId.eq(id))
-                            .fetch()));
+                            .fetch().stream()
+                            .map(tuple -> StickerInfo.builder()
+                                .stickerId(tuple.get(0, Long.class))
+                                .likeScheduleId(tuple.get(1, Long.class))
+                                .build()
+                            ).collect(Collectors.toList())));
 
             // 결과 매핑
             List<PillScheduleInfo> pillScheduleInfoList = pillScheduleIds.stream()
                     .flatMap(scheduleId -> {
-                        List<Long> stickerIds = stickerIdMap.getOrDefault(scheduleId, Collections.emptyList());
+                        List<StickerInfo> stickerIds = stickerIdMap.getOrDefault(scheduleId, Collections.emptyList());
                         return queryFactory
                                 .select(
                                         pillSchedule.id,
