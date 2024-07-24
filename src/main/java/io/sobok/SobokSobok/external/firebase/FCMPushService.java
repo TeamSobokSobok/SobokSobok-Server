@@ -2,8 +2,11 @@ package io.sobok.SobokSobok.external.firebase;
 
 import com.google.firebase.messaging.*;
 import io.sobok.SobokSobok.auth.application.util.UserServiceUtil;
+import io.sobok.SobokSobok.auth.domain.Platform;
 import io.sobok.SobokSobok.auth.domain.User;
 import io.sobok.SobokSobok.auth.infrastructure.UserRepository;
+import io.sobok.SobokSobok.exception.ErrorCode;
+import io.sobok.SobokSobok.exception.model.BadRequestException;
 import io.sobok.SobokSobok.external.firebase.dto.PushNotificationRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,78 +22,43 @@ public class FCMPushService {
     private final UserRepository userRepository;
 
     public void sendNotificationByToken(PushNotificationRequest request) {
-        User user = UserServiceUtil.findUserById(userRepository, request.userId());
-
-        Message message = Message.builder()
-                .setToken(user.getDeviceToken())
-                .setNotification(
-                        Notification.builder()
-                                .setTitle(request.title())
-                                .setBody(request.body())
-                                .build()
-                )
-                .setAndroidConfig(
-                        AndroidConfig.builder()
-                                .setNotification(
-                                        AndroidNotification.builder()
-                                                .setTitle(request.title())
-                                                .setBody(request.body())
-                                                .setClickAction("push_click")
-                                                .build()
-                                )
-                                .build()
-                )
-                .setApnsConfig(
-                        ApnsConfig.builder()
-                                .setAps(Aps.builder()
-                                        .setCategory("push_click")
-                                        .build())
-                                .build()
-                )
-                .putData("title", request.title())
-                .putData("body", request.body() == null ? "" : request.body())
-                .putData("type", request.type())
-                .build();
-
-        sendMessageToFirebase(message, user.getId());
+        sendNotification(request, null);
     }
 
     public void sendNotificationByTokenWithFriendData(PushNotificationRequest request) {
+        sendNotification(request, request.data().get("friendId"));
+    }
+
+    private void sendNotification(PushNotificationRequest request, String friendId) {
         User user = UserServiceUtil.findUserById(userRepository, request.userId());
+        Message.Builder messageBuilder;
+        if (user.getPlatform().equals(Platform.ANDROID)) {
+            messageBuilder = Message.builder()
+                    .setToken(user.getDeviceToken())
+                    .putData("title", request.title())
+                    .putData("body", request.body() == null ? "" : request.body())
+                    .putData("type", request.type());
+        } else if (user.getPlatform().equals(Platform.iOS)) {
+            messageBuilder = Message.builder()
+                    .setToken(user.getDeviceToken())
+                    .setNotification(buildNotification(request))
+                    .putData("type", request.type());
+        } else {
+            throw new BadRequestException(ErrorCode.INVALID_PLATFORM);
+        }
 
-        Message message = Message.builder()
-                .setToken(user.getDeviceToken())
-                .setNotification(
-                        Notification.builder()
-                                .setTitle(request.title())
-                                .setBody(request.body())
-                                .build()
-                )
-                .setAndroidConfig(
-                        AndroidConfig.builder()
-                                .setNotification(
-                                        AndroidNotification.builder()
-                                                .setTitle(request.title())
-                                                .setBody(request.body())
-                                                .setClickAction("push_click")
-                                                .build()
-                                )
-                                .build()
-                )
-                .setApnsConfig(
-                        ApnsConfig.builder()
-                                .setAps(Aps.builder()
-                                        .setCategory("push_click")
-                                        .build())
-                                .build()
-                )
-                .putData("title", request.title())
-                .putData("body", request.body() == null ? "" : request.body())
-                .putData("type", request.type())
-                .putData("friendId", request.data().get("friendId"))
+        if (friendId != null) {
+            messageBuilder.putData("friendId", friendId);
+        }
+
+        sendMessageToFirebase(messageBuilder.build(), user.getId());
+    }
+
+    private Notification buildNotification(PushNotificationRequest request) {
+        return Notification.builder()
+                .setTitle(request.title())
+                .setBody(request.body())
                 .build();
-
-        sendMessageToFirebase(message, user.getId());
     }
 
     private void sendMessageToFirebase(Message message, Long userId) {
