@@ -59,6 +59,10 @@ public class Pill extends BaseEntity {
         this.userId = userId;
     }
 
+    public void updatePillName(String newPillName) {
+        this.pillName = newPillName;
+    }
+
     public boolean isPillUser(Long userId) {
         return Objects.equals(this.userId, userId);
     }
