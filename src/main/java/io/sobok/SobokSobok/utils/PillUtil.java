@@ -2,6 +2,9 @@ package io.sobok.SobokSobok.utils;
 
 import io.sobok.SobokSobok.exception.ErrorCode;
 import io.sobok.SobokSobok.exception.model.BadRequestException;
+import io.sobok.SobokSobok.pill.domain.Pill;
+import io.sobok.SobokSobok.pill.ui.dto.PillRequest;
+import io.sobok.SobokSobok.pill.ui.dto.PillUpdateRequest;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -37,6 +40,12 @@ public class PillUtil {
         }
 
         return matchingDates.toArray(new LocalDate[0]);
+    }
+
+    public static Boolean checkChangePillSchedule(Pill pill, PillUpdateRequest pillRequest) {
+        return !pill.getScheduleDay().equals(pillRequest.day()) ||
+                !pill.getStartDate().equals(pillRequest.startDate()) ||
+                !pill.getEndDate().equals(pillRequest.endDate());
     }
 
     private static String convertToEnglishDayOfWeek(String koreanDayOfWeek) {
