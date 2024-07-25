@@ -21,6 +21,7 @@ import io.sobok.SobokSobok.pill.infrastructure.*;
 import io.sobok.SobokSobok.pill.ui.dto.PillListResponse;
 import io.sobok.SobokSobok.pill.ui.dto.PillRequest;
 import io.sobok.SobokSobok.pill.ui.dto.PillResponse;
+import io.sobok.SobokSobok.pill.ui.dto.PillUpdateRequest;
 import io.sobok.SobokSobok.utils.PillUtil;
 import lombok.RequiredArgsConstructor;
 import io.sobok.SobokSobok.pill.infrastructure.PillQueryRepository;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -150,6 +152,41 @@ public class PillService {
         }
 
         return pillQueryRepository.getPillCount(userId);
+    }
+
+    @Transactional
+    public void updatePill(Long userId, Long pillId, PillUpdateRequest request) {
+        UserServiceUtil.existsUserById(userRepository, userId);
+        Pill pill = PillServiceUtil.findPillById(pillRepository, pillId);
+        boolean isTimeListChanged = false;
+
+        if (!pill.isPillUser(userId)) {
+            throw new ForbiddenException(ErrorCode.UNAUTHORIZED_PILL);
+        }
+
+        if (!pill.getPillName().equals(request.pillName())) {
+            pill.updatePillName(request.pillName());
+        }
+
+        List<String> timeList = Arrays.asList(request.timeList());
+        if (!timeList.equals(pillScheduleQueryRepository.getPillScheduleTime(pillId))) {
+            isTimeListChanged = true;
+        }
+
+        if (PillUtil.checkChangePillSchedule(pill, request) || isTimeListChanged) {
+            pillScheduleRepository.deleteAllByPillId(pillId);
+            LocalDate[] scheduleDate = PillUtil.getScheduleDateList(request.startDate(), request.endDate(), request.day().split(", "));
+            for (LocalDate date : scheduleDate) {
+                for (String time : request.timeList()) {
+                    pillScheduleRepository.save(PillSchedule.builder()
+                            .scheduleDate(date)
+                            .scheduleTime(time)
+                            .pillId(pillId)
+                            .build()
+                    );
+                }
+            }
+        }
     }
 
     @Transactional

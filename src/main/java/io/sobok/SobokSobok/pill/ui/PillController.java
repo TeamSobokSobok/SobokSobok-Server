@@ -3,10 +3,12 @@ package io.sobok.SobokSobok.pill.ui;
 import io.sobok.SobokSobok.auth.domain.User;
 import io.sobok.SobokSobok.common.dto.ApiResponse;
 import io.sobok.SobokSobok.exception.SuccessCode;
+import io.sobok.SobokSobok.pill.application.PillScheduleService;
 import io.sobok.SobokSobok.pill.application.PillService;
 import io.sobok.SobokSobok.pill.ui.dto.PillListResponse;
 import io.sobok.SobokSobok.pill.ui.dto.PillRequest;
 import io.sobok.SobokSobok.pill.ui.dto.PillResponse;
+import io.sobok.SobokSobok.pill.ui.dto.PillUpdateRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -25,6 +27,7 @@ import java.util.List;
 public class PillController {
 
     private final PillService pillService;
+    private final PillScheduleService pillScheduleService;
 
     @PostMapping("")
     @Operation(
@@ -87,6 +90,22 @@ public class PillController {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(ApiResponse.success(SuccessCode.SEND_PILL_SUCCESS));
+    }
+
+    @PutMapping("/{pillId}")
+    @Operation(
+            summary = "약 수정 API 메서드",
+            description = "내 약 정보를 수정하는 메서드입니다."
+    )
+    public ResponseEntity<ApiResponse<Void>> updatePill(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long pillId,
+            @RequestBody @Valid final PillUpdateRequest request
+    ) {
+        pillService.updatePill(user.getId(), pillId, request);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(ApiResponse.success(SuccessCode.UPDATE_PILL_SUCCESS));
     }
 
     @DeleteMapping("/{pillId}")
