@@ -37,7 +37,6 @@ public class SecurityConfig {
             "/auth/login",
             "/auth/refresh",
             "/user",
-            "/pill/**",
             "/pill/count/**",
             "/sticker/image"
     };
