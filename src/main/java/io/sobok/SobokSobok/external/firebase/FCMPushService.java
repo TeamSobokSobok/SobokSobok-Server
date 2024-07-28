@@ -32,13 +32,13 @@ public class FCMPushService {
     private void sendNotification(PushNotificationRequest request, String friendId) {
         User user = UserServiceUtil.findUserById(userRepository, request.userId());
         Message.Builder messageBuilder;
-        if (user.getPlatform().equals(Platform.ANDROID)) {
+        if (user.getSocialInfo().getPlatform().equals(Platform.ANDROID)) {
             messageBuilder = Message.builder()
                     .setToken(user.getDeviceToken())
                     .putData("title", request.title())
                     .putData("body", request.body() == null ? "" : request.body())
                     .putData("type", request.type());
-        } else if (user.getPlatform().equals(Platform.iOS)) {
+        } else if (user.getSocialInfo().getPlatform().equals(Platform.iOS)) {
             messageBuilder = Message.builder()
                     .setToken(user.getDeviceToken())
                     .setNotification(buildNotification(request))
