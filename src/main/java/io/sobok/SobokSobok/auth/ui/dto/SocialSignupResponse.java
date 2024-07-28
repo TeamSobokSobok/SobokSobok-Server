@@ -15,4 +15,13 @@ public record SocialSignupResponse(
 
         String refreshToken
 ) {
+    public static SocialSignupResponse of(
+            final Long id,
+            final String username,
+            final String socialId,
+            final String accessToken,
+            final String refreshToken
+    ) {
+        return new SocialSignupResponse(id, username, socialId, accessToken, refreshToken);
+    }
 }
