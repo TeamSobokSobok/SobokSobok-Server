@@ -49,17 +49,15 @@ public class User extends BaseEntity implements UserDetails {
     @Column
     private String leaveReason;
 
-    @Column
-    @Enumerated(EnumType.STRING)
-    private Platform platform;
+    public static User newInstance(String username, SocialInfo socialInfo, String deviceToken, String roles) {
+        return new User(username, socialInfo, deviceToken, roles);
+    }
 
-    @Builder
-    public User(String username, SocialInfo socialInfo, String deviceToken, String roles, Platform platform) {
+    private User(String username, SocialInfo socialInfo, String deviceToken, String roles) {
         this.username = username;
         this.socialInfo = socialInfo;
         this.deviceToken = deviceToken;
         this.roles = roles;
-        this.platform = platform;
     }
 
     public void updateDeviceToken(String newDeviceToken) {
@@ -71,7 +69,7 @@ public class User extends BaseEntity implements UserDetails {
     }
 
     public void updatePlatform(Platform platform) {
-        this.platform = platform;
+        this.socialInfo.changeSocialPlatform(platform);
     }
 
     public void deleteUser(String leaveReason) {

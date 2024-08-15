@@ -58,7 +58,7 @@ public class UserService {
         User user = UserServiceUtil.findUserById(userRepository, userId);
 
         if (duplicateNickname(username)) {
-            throw new ConflictException(ErrorCode.ALREADY_USING_USERNAME);
+            throw new ConflictException(ErrorCode.ALREADY_USING_NICKNAME);
         }
 
         user.changeUsername(username);
